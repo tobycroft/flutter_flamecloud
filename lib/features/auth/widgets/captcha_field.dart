@@ -77,8 +77,9 @@ class _CaptchaImage extends StatelessWidget {
     required this.onRefresh,
   });
 
-  static const double _width = 128;
-  static const double _height = 56;
+  /// 显示尺寸与 Vue 端一致（w-42 = 168px, h-[58px]）。
+  static const double _width = 168;
+  static const double _height = 58;
 
   final Captcha? captcha;
   final bool loading;
@@ -115,7 +116,7 @@ class _CaptchaImage extends StatelessWidget {
                     key: ValueKey<String>(captcha!.ident),
                     width: _width,
                     height: _height,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     autostart: Autostart.loop,
                   )
                 : Text(
