@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:gif/gif.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
@@ -109,14 +110,13 @@ class _CaptchaImage extends StatelessWidget {
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: hasImage
-                ? Image.memory(
-                    bytes,
+                ? Gif(
+                    image: MemoryImage(bytes),
                     key: ValueKey<String>(captcha!.ident),
                     width: _width,
                     height: _height,
                     fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                    filterQuality: FilterQuality.medium,
+                    autostart: Autostart.loop,
                   )
                 : Text(
                     loading ? '加载中...' : '点击刷新',
