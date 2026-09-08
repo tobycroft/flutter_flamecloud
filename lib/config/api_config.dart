@@ -3,16 +3,15 @@ import 'package:flutter/foundation.dart';
 /// 后端接口地址与端点常量。
 ///
 /// 与 vue_flamecloud/src/config/api.ts 一一对应，方便后续按 Vue 页面逐个搬迁。
-/// 地址不硬编码：默认与 Vue 端保持一致（http://127.0.0.1），
-/// 可通过 `flutter run --dart-define=API_BASE_URL=xxx` 覆盖。
+/// 默认指向标准调试服务器，测试/正式环境一致；
+/// 如需临时覆盖，可通过 `flutter run --dart-define=API_BASE_URL=xxx` 注入。
 class ApiConfig {
   const ApiConfig._();
 
-  /// 后端网关地址，对应 Vue 端
-  /// `import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1'`。
+  /// 后端网关地址（标准调试服务器，测试/正式共用）。
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1',
+    defaultValue: 'https://flame.tuuz.ltd:433',
   );
 
   /// 连接超时。
