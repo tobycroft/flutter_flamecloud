@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/api_config.dart';
@@ -37,11 +40,14 @@ class AuthRepository {
   /// 账号密码登录。
   ///
   /// [ident] 由 [createCaptcha] 返回，[code] 为用户输入的验证码。
+  /// [deviceType] 上报设备类型（web/android/ios），后端据此支持多端同时在线，
+  /// 同设备类型重复登录会替换该设备的旧 token；缺省自动按运行平台推断。
   Future<AuthUser> login({
     required String username,
     required String password,
     required String ident,
     required String code,
+    String? deviceType,
   }) async {
     try {
       final Response<dynamic> response = await _dio.post<dynamic>(
@@ -51,6 +57,7 @@ class AuthRepository {
           'password': password,
           'ident': ident,
           'code': code,
+          'device_type': deviceType ?? defaultDeviceType(),
         },
       );
       final Map<String, dynamic>? data = _unwrap(response).asMap;
@@ -86,6 +93,14 @@ class AuthRepository {
     }
     throw const ApiFormatException();
   }
+}
+
+/// 当前运行平台的设备类型标识，与后端约定的 device_type 一致。
+String defaultDeviceType() {
+  if (kIsWeb) {
+    return 'web';
+  }
+  return Platform.operatingSystem; // android / ios
 }
 
 /// 认证仓库实例。
