@@ -3,18 +3,50 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_mode_controller.dart';
+import '../../data/models/app_release.dart';
 import '../../data/models/user_info.dart';
 import '../auth/session_controller.dart';
+import '../update/update_controller.dart';
+import '../update/widgets/update_dialog.dart';
 
 /// 控制台占位页。
 ///
 /// 本阶段仅验证「登录 -> 进入控制台 -> 退出登录」链路，
 /// 后续按 vue_flamecloud/src/pages/console 逐个搬迁业务页面。
-class ConsolePage extends ConsumerWidget {
+class ConsolePage extends ConsumerStatefulWidget {
   const ConsolePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsolePage> createState() => _ConsolePageState();
+}
+
+class _ConsolePageState extends ConsumerState<ConsolePage> {
+  /// 避免热重建等场景重复发起检查。
+  bool _updateCheckStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _updateCheckStarted) {
+        return;
+      }
+      _updateCheckStarted = true;
+      ref.read(updateControllerProvider.notifier).checkForUpdate();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<UpdateCheckState>(updateControllerProvider,
+        (UpdateCheckState? previous, UpdateCheckState next) {
+      final AppRelease? release = next.asData?.value;
+      if (release != null) {
+        ref.read(updateControllerProvider.notifier).dismiss();
+        showUpdateDialog(context, release);
+      }
+    });
+
     final UserInfo? user =
         ref.watch(sessionControllerProvider).asData?.value?.user;
     final ThemeMode themeMode = ref.watch(themeModeControllerProvider);
