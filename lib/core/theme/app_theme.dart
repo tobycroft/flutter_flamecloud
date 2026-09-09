@@ -23,10 +23,27 @@ class AppTheme {
   /// 暗色主题。
   static ThemeData dark() => _base(Brightness.dark);
 
-  static ThemeData _base(Brightness brightness) {
+  /// OLED 纯黑主题。
+  ///
+  /// 表面与背景使用纯黑（Colors.black），配合 OLED 屏幕可完全熄灭
+  /// 像素以省电；输入框填充与描边用极深灰替代 dark 色板以保持层次。
+  static ThemeData oled() => _base(Brightness.dark, oled: true);
+
+  static ThemeData _base(Brightness brightness, {bool oled = false}) {
     final bool isDark = brightness == Brightness.dark;
-    final Color surface = isDark ? AppColors.dark500 : Colors.white;
-    final Color scaffold = isDark ? AppColors.dark700 : AppColors.flame50;
+    final Color surface = isDark
+        ? (oled ? Colors.black : AppColors.dark500)
+        : Colors.white;
+    final Color scaffold = isDark
+        ? (oled ? Colors.black : AppColors.dark700)
+        : AppColors.flame50;
+    // 暗色下的输入框填充与描边；OLED 用极深灰保留层次感。
+    final Color inputFill = isDark
+        ? (oled ? const Color(0xFF0D0D0D) : AppColors.dark400)
+        : const Color(0xFFF9FAFB);
+    final Color inputBorder = isDark
+        ? (oled ? const Color(0xFF262626) : AppColors.dark300)
+        : const Color(0xFFE5E7EB);
 
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: AppColors.flame500,
@@ -47,7 +64,7 @@ class AppTheme {
       splashFactory: InkSparkle.splashFactory,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.dark400 : const Color(0xFFF9FAFB),
+        fillColor: inputFill,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 18,
@@ -56,10 +73,8 @@ class AppTheme {
           color: isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
           fontSize: 15,
         ),
-        border: _inputBorder(isDark ? AppColors.dark300 : const Color(0xFFE5E7EB)),
-        enabledBorder: _inputBorder(
-          isDark ? AppColors.dark300 : const Color(0xFFE5E7EB),
-        ),
+        border: _inputBorder(inputBorder),
+        enabledBorder: _inputBorder(inputBorder),
         focusedBorder: _inputBorder(AppColors.flame500, width: 1.6),
         errorBorder: _inputBorder(const Color(0xFFDC2626)),
         focusedErrorBorder: _inputBorder(const Color(0xFFDC2626), width: 1.6),
@@ -125,7 +140,7 @@ class AppTheme {
           return Colors.transparent;
         }),
         side: BorderSide(
-          color: isDark ? AppColors.dark300 : const Color(0xFFD1D5DB),
+          color: isDark ? inputBorder : const Color(0xFFD1D5DB),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),

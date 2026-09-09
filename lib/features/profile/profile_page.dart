@@ -19,7 +19,7 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final UserInfo? user =
         ref.watch(sessionControllerProvider).asData?.value?.user;
-    final ThemeMode themeMode = ref.watch(themeModeControllerProvider);
+    final AppThemeMode themeMode = ref.watch(themeModeControllerProvider);
     final bool autoUpdate = ref.watch(autoUpdateSettingProvider);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -91,10 +91,11 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  String _themeName(ThemeMode mode) => switch (mode) {
-        ThemeMode.light => '浅色',
-        ThemeMode.dark => '深色',
-        ThemeMode.system => '跟随系统',
+  String _themeName(AppThemeMode mode) => switch (mode) {
+        AppThemeMode.light => '浅色',
+        AppThemeMode.dark => '深色',
+        AppThemeMode.oled => 'OLED',
+        AppThemeMode.system => '跟随系统',
       };
 
   /// 尚未搬迁的页面统一提示。
