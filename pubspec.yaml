@@ -95,11 +95,18 @@ flutter:
 
 # 应用图标生成配置，修改 assets/icon/icon.png 后执行：
 # dart run flutter_launcher_icons
+#
+# 注意：Android 8+ 使用的是自适应图标(Adaptive Icon)，
+# 启动器会给它套形状遮罩(圆/方/水滴)。因此前景图必须是「只有图形、
+# 背景透明、主体居中」的图，不能再用带 "FLAME CLOUD" 文字的整张合成图，
+# 否则桌面图标上的文字会被遮罩裁掉，与安装时看到的不一致。
+# 前景图由 tools/gen_adaptive_foreground.py 从 icon.png 生成：
+# python3 tools/gen_adaptive_foreground.py
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
-  android: "launcher_icon"
+  android: "ic_launcher"
   ios: true
   remove_alpha_ios: true
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon/icon.png"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
 
