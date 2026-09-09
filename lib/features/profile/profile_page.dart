@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/theme_mode_controller.dart';
 import '../../data/models/user_info.dart';
 import '../auth/session_controller.dart';
+import '../update/auto_update_setting_controller.dart';
 
 /// 我的 tab。
 ///
@@ -19,6 +20,7 @@ class ProfilePage extends ConsumerWidget {
     final UserInfo? user =
         ref.watch(sessionControllerProvider).asData?.value?.user;
     final ThemeMode themeMode = ref.watch(themeModeControllerProvider);
+    final bool autoUpdate = ref.watch(autoUpdateSettingProvider);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -30,6 +32,15 @@ class ProfilePage extends ConsumerWidget {
         children: <Widget>[
           _ProfileHeader(user: user),
           const SizedBox(height: 16),
+          _SwitchTile(
+            icon: Icons.system_update_outlined,
+            title: '自动更新',
+            subtitle: '开启后进入 APP 时自动检查新版本',
+            value: autoUpdate,
+            onChanged: (bool value) =>
+                ref.read(autoUpdateSettingProvider.notifier).setEnabled(value),
+          ),
+          const SizedBox(height: 12),
           _ActionTile(
             icon: Icons.brightness_6_outlined,
             title: '主题模式',
@@ -168,6 +179,72 @@ class _ProfileHeader extends StatelessWidget {
   String _initial(UserInfo? user) {
     final String name = user?.displayName ?? '';
     return name.isEmpty ? '火' : name.characters.first.toUpperCase();
+  }
+}
+
+/// 带开关的设置项。
+class _SwitchTile extends StatelessWidget {
+  const _SwitchTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: isDark ? AppColors.dark500 : Colors.white,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: <Widget>[
+            Icon(icon, size: 20, color: AppColors.flame500),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Switch(
+              value: value,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

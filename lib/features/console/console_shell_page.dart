@@ -9,6 +9,7 @@ import '../message/message_page.dart';
 import '../profile/profile_page.dart';
 import '../service/service_page.dart';
 import '../support/support_chat_controller.dart';
+import '../update/auto_update_setting_controller.dart';
 import '../update/update_controller.dart';
 import '../update/widgets/update_dialog.dart';
 
@@ -39,7 +40,10 @@ class _ConsoleShellPageState extends ConsumerState<ConsoleShellPage> {
         return;
       }
       _updateCheckStarted = true;
-      ref.read(updateControllerProvider.notifier).checkForUpdate();
+      // 仅在自动更新开启时检查，开关状态存本地且默认开启。
+      if (ref.read(autoUpdateSettingProvider)) {
+        ref.read(updateControllerProvider.notifier).checkForUpdate();
+      }
       // 客服消息常驻轮询，底栏「消息」红标依赖它。
       unawaited(ref.read(supportChatControllerProvider.notifier).start());
     });
