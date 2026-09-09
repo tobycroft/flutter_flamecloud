@@ -42,11 +42,6 @@ class ServicePage extends StatelessWidget {
       name: '操作日志',
       description: '账号下的操作审计记录',
     ),
-    ServiceEntry(
-      icon: Icons.confirmation_number_outlined,
-      name: '工单',
-      description: '提交与跟踪售后工单',
-    ),
   ];
 
   @override
