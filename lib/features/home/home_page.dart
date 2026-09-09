@@ -91,7 +91,7 @@ class _AccountCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user?.balance != null ? '账户余额 ¥${user!.balance}' : '余额加载中',
+                  '欢迎回来',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 13,

@@ -197,6 +197,30 @@ class _ProfileHeader extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                _balanceText(user),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.flame500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '账户余额',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF6B7280),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -212,6 +236,15 @@ class _ProfileHeader extends StatelessWidget {
       return phone;
     }
     return '';
+  }
+
+  /// 余额展示文案，未加载到时展示占位符。
+  String _balanceText(UserInfo? user) {
+    final String? balance = user?.balance;
+    if (balance != null && balance.isNotEmpty) {
+      return '¥$balance';
+    }
+    return '--';
   }
 
   String _initial(UserInfo? user) {
