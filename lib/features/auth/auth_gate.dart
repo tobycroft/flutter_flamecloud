@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../console/console_page.dart';
+import '../console/console_shell_page.dart';
 import 'login_page.dart';
 import 'session_controller.dart';
 import 'splash/splash_page.dart';
@@ -20,7 +20,7 @@ class AuthGate extends ConsumerWidget {
 
     return session.when(
       data: (SessionSnapshot? snapshot) =>
-          snapshot == null ? const LoginPage() : const ConsolePage(),
+          snapshot == null ? const LoginPage() : const ConsoleShellPage(),
       loading: () => const SplashPage(),
       error: (Object error, StackTrace stackTrace) => const LoginPage(),
     );

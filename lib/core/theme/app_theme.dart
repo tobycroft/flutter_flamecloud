@@ -100,6 +100,20 @@ class AppTheme {
         color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF1F5F9),
         space: 1,
       ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surface,
+        // 选中色沿用品牌主色，与 Vue 端控制台菜单的 flame-500 一致。
+        selectedItemColor: AppColors.flame500,
+        unselectedItemColor:
+            isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280),
+        selectedLabelStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
+        type: BottomNavigationBarType.fixed,
+        elevation: 8,
+      ),
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
