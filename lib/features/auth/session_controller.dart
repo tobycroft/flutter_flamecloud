@@ -8,6 +8,7 @@ import '../../core/storage/storage_providers.dart';
 import '../../data/models/auth_user.dart';
 import '../../data/models/user_info.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../support/support_chat_controller.dart';
 import 'login_controller.dart';
 
 /// 当前登录态快照，为 null 表示未登录。
@@ -101,6 +102,8 @@ class SessionController extends AsyncNotifier<SessionSnapshot?> {
       return;
     }
     ref.invalidate(loginControllerProvider);
+    // 停止客服消息轮询，避免退出后定时器继续运行。
+    ref.invalidate(supportChatControllerProvider);
     state = const AsyncData<SessionSnapshot?>(null);
   }
 
@@ -131,6 +134,8 @@ class SessionController extends AsyncNotifier<SessionSnapshot?> {
       }
       // 与退出登录保持一致，回到登录页时重新拉取验证码。
       ref.invalidate(loginControllerProvider);
+      // 登录失效同样停止客服消息轮询。
+      ref.invalidate(supportChatControllerProvider);
       state = const AsyncData<SessionSnapshot?>(null);
     });
   }
