@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# DevTools 本地工具配置（含本机扩展启用状态，不纳入版本控制）
+devtools_options.yaml
+
 # Symbolication related
 app.*.symbols
 
