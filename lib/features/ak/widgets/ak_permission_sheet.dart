@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/net/api_exception.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../data/models/access_key.dart';
 import '../../../data/repositories/access_key_repository.dart';
 
@@ -107,9 +106,6 @@ class _AkPermissionSheetState extends ConsumerState<AkPermissionSheet> {
       if (!mounted) {
         return;
       }
-      if (!context.mounted) {
-        return;
-      }
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(const SnackBar(content: Text('权限保存成功')));
@@ -168,46 +164,50 @@ class _AkPermissionSheetState extends ConsumerState<AkPermissionSheet> {
             Table(
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               children: <TableRow>[
-                <Widget>[
-                  const SizedBox.shrink(),
-                  for (final (String, String) action in _kActions)
-                    Center(
-                      child: Text(
-                        action.$2,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                ],
-                for (final (String, String) resource in _kResources)
-                  <Widget>[
-                    Text(
-                      resource.$2,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                TableRow(
+                  children: <Widget>[
+                    const SizedBox.shrink(),
                     for (final (String, String) action in _kActions)
                       Center(
-                        child: Checkbox(
-                          value: _grants.contains(
-                            '${resource.$1}_${action.$1}',
+                        child: Text(
+                          action.$2,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
-                          onChanged: (bool? value) => setState(() {
-                            final String key =
-                                '${resource.$1}_${action.$1}';
-                            if (value == true) {
-                              _grants.add(key);
-                            } else {
-                              _grants.remove(key);
-                            }
-                          }),
                         ),
                       ),
                   ],
+                ),
+                for (final (String, String) resource in _kResources)
+                  TableRow(
+                    children: <Widget>[
+                      Text(
+                        resource.$2,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      for (final (String, String) action in _kActions)
+                        Center(
+                          child: Checkbox(
+                            value: _grants.contains(
+                              '${resource.$1}_${action.$1}',
+                            ),
+                            onChanged: (bool? value) => setState(() {
+                              final String key =
+                                  '${resource.$1}_${action.$1}';
+                              if (value == true) {
+                                _grants.add(key);
+                              } else {
+                                _grants.remove(key);
+                              }
+                            }),
+                          ),
+                        ),
+                    ],
+                  ),
               ],
             ),
             if (_errorText != null)

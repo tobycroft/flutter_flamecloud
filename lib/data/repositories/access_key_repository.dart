@@ -153,7 +153,7 @@ class AccessKeyRepository {
             : ApiEndpoints.accessKey.log,
         queryParameters: <String, Object?>{
           'page': page,
-          if (akId != null) 'ak_id': akId,
+          'ak_id': ?akId,
           'page_size': pageSize,
         },
       );

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/theme_mode_controller.dart';
@@ -52,14 +55,18 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.key_outlined,
             title: 'AK 管理',
             subtitle: '访问密钥的创建与停用',
-            onTap: () => _comingSoon(context, 'AK 管理'),
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.akManage),
+            ),
           ),
           const SizedBox(height: 12),
           _ActionTile(
             icon: Icons.history_outlined,
             title: '操作日志',
             subtitle: '账号下的操作审计记录',
-            onTap: () => _comingSoon(context, '操作日志'),
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.actionLog),
+            ),
           ),
           const SizedBox(height: 12),
           _ActionTile(

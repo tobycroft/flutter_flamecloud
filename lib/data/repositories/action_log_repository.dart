@@ -52,7 +52,7 @@ class ActionLogRepository {
         queryParameters: <String, Object?>{
           'page': page,
           'page_size': pageSize,
-          if (typeId != null) 'log_type_id': typeId,
+          'log_type_id': ?typeId,
         },
       );
       final Map<String, dynamic>? data = _unwrap(response).asMap;

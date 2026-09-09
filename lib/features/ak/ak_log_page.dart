@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../ak_log_controller.dart';
+import 'ak_log_controller.dart';
 import 'widgets/ak_log_list.dart';
 
 /// AK 调用日志页，搬迁自 vue_flamecloud/AkLogsPage。
