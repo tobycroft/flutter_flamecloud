@@ -56,6 +56,13 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _ActionTile(
+            icon: Icons.history_outlined,
+            title: '操作日志',
+            subtitle: '账号下的操作审计记录',
+            onTap: () => _comingSoon(context, '操作日志'),
+          ),
+          const SizedBox(height: 12),
+          _ActionTile(
             icon: Icons.brightness_6_outlined,
             title: '主题模式',
             subtitle: _themeName(themeMode),

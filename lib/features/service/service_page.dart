@@ -32,11 +32,6 @@ class ServicePage extends StatelessWidget {
       name: '资源管理',
       description: '资源包与资源总览',
     ),
-    ServiceEntry(
-      icon: Icons.history_outlined,
-      name: '操作日志',
-      description: '账号下的操作审计记录',
-    ),
   ];
 
   @override
