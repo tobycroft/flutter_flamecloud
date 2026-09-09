@@ -49,6 +49,13 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _ActionTile(
+            icon: Icons.key_outlined,
+            title: 'AK 管理',
+            subtitle: '访问密钥的创建与停用',
+            onTap: () => _comingSoon(context, 'AK 管理'),
+          ),
+          const SizedBox(height: 12),
+          _ActionTile(
             icon: Icons.brightness_6_outlined,
             title: '主题模式',
             subtitle: _themeName(themeMode),

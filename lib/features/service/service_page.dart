@@ -33,11 +33,6 @@ class ServicePage extends StatelessWidget {
       description: '资源包与资源总览',
     ),
     ServiceEntry(
-      icon: Icons.key_outlined,
-      name: 'AK 管理',
-      description: '访问密钥的创建与停用',
-    ),
-    ServiceEntry(
       icon: Icons.history_outlined,
       name: '操作日志',
       description: '账号下的操作审计记录',
