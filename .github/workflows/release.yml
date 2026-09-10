@@ -87,3 +87,4 @@ jobs:
           gitee_file_name: app-release.apk # 在 Gitee Release 页面展示的附件文件名
           gitee_file_path: build/app/outputs/flutter-apk/app-release.apk # 本地打包产物的路径
           gitee_upload_retry_times: 3 # 遇到网络抖动自动重试 [cite: 2.2.2]
+          
