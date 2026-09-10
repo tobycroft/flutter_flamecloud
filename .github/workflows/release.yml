@@ -2,8 +2,8 @@ name: Flutter Auto Release
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ] # 取消这里的注释，以后每次 push main 都会自动打新包发布
+  # push:
+  #   branches: [ main ]
 
 permissions:
   contents: write
@@ -33,9 +33,8 @@ jobs:
       # 1. 动态计算下一个版本号
       - name: Calculate Next Version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh 命令需要 Token 权限
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 使用 gh cli 获取最新的 release tag，如果报错（比如没发过版）则返回空
           LATEST_TAG=$(gh release view --json tagName -q ".tagName" 2>/dev/null || echo "")
           
           if [ -z "$LATEST_TAG" ]; then
@@ -44,39 +43,26 @@ jobs:
             NEW_TAG="v1.0.0"
           else
             echo "当前最新 Release 版本为: $LATEST_TAG"
-            
-            # 去除开头的 'v' 字符 (例如 v1.0.0 变成 1.0.0)
             VERSION_NUM=${LATEST_TAG#v}
-            
-            # 使用 . 作为分隔符，拆分主版本、次版本、修订号
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NUM"
-            
-            # 如果解析失败，给个默认值
             MAJOR=${MAJOR:-1}
             MINOR=${MINOR:-0}
             PATCH=${PATCH:-0}
-            
-            # 将最后一位修订号加 1
             PATCH=$((PATCH + 1))
-            
-            # 组合新的版本号
             NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
             NEW_TAG="v${NEW_VERSION}"
           fi
           
           echo "计算出的新版本为: $NEW_TAG"
-          
-          # 写入环境变量，供后续步骤使用
           echo "APP_VERSION=$NEW_TAG" >> $GITHUB_ENV
           echo "BUILD_NAME=$NEW_VERSION" >> $GITHUB_ENV
 
       # 2. 构建 APK（动态注入版本号）
       - name: Build APK
-        # 使用 --build-name 将计算出的版本号（如 1.0.1）覆盖注入到 APK 中
         run: flutter build apk --release --build-name=${{ env.BUILD_NAME }}
         
-      # 3. 创建 Release 并上传
-      - name: Create Release and Upload APK
+      # 3. 创建 GitHub Release 并上传
+      - name: Create Release and Upload APK to GitHub
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.APP_VERSION }}     
@@ -86,115 +72,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ============================================================
-      # 4. 新增：同步发布到 Gitee
-      # ============================================================
-      - name: Create Gitee Release
-        env:
-          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
-          GITEE_OWNER: ${{ secrets.GITEE_OWNER }}
-          GITEE_REPO: ${{ secrets.GITEE_REPO }}
-        run: |
-          set -e
-
-          echo "开始创建 Gitee Release..."
-          echo "Repository: ${GITEE_OWNER}/${GITEE_REPO}"
-          echo "Tag: ${APP_VERSION}"
-
-          CREATE_RESPONSE=$(mktemp)
-
-          HTTP_CODE=$(curl -sS \
-            -o "$CREATE_RESPONSE" \
-            -w "%{http_code}" \
-            -X POST \
-            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases" \
-            -H "Authorization: Bearer ${GITEE_TOKEN}" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            --data-urlencode "tag_name=${APP_VERSION}" \
-            --data-urlencode "name=Release ${APP_VERSION}" \
-            --data-urlencode "body=Flutter Android Release ${APP_VERSION}" \
-            --data-urlencode "target_commitish=main"
-          )
-
-          echo "Gitee API HTTP Status: ${HTTP_CODE}"
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "创建 Gitee Release 失败："
-            cat "$CREATE_RESPONSE"
-            exit 1
-          fi
-
-          cat "$CREATE_RESPONSE"
-
-          GITEE_RELEASE_ID=$(jq -r '.id // empty' "$CREATE_RESPONSE")
-
-          if [ -z "$GITEE_RELEASE_ID" ]; then
-            echo "无法获取 Gitee Release ID"
-            exit 1
-          fi
-
-          echo "Gitee Release ID: ${GITEE_RELEASE_ID}"
-
-          echo "Gitee Release 创建成功"
-
-      # ============================================================
-      # 5. 新增：上传 APK 到 Gitee Release
-      # ============================================================
-      - name: Upload APK to Gitee Release
-        env:
-          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
-          GITEE_OWNER: ${{ secrets.GITEE_OWNER }}
-          GITEE_REPO: ${{ secrets.GITEE_REPO }}
-        run: |
-          set -e
-
-          echo "开始上传 APK 到 Gitee Release..."
-
-          RELEASE_RESPONSE=$(mktemp)
-
-          # 获取刚刚创建的 Release ID
-          HTTP_CODE=$(curl -sS \
-            -o "$RELEASE_RESPONSE" \
-            -w "%{http_code}" \
-            -X GET \
-            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/tags/${APP_VERSION}" \
-            -H "Authorization: Bearer ${GITEE_TOKEN}")
-
-          echo "Gitee Release 查询 HTTP Status: ${HTTP_CODE}"
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "获取 Gitee Release 失败："
-            cat "$RELEASE_RESPONSE"
-            exit 1
-          fi
-
-          GITEE_RELEASE_ID=$(jq -r '.id // empty' "$RELEASE_RESPONSE")
-
-          if [ -z "$GITEE_RELEASE_ID" ]; then
-            echo "无法获取 Gitee Release ID"
-            exit 1
-          fi
-
-          echo "Gitee Release ID: ${GITEE_RELEASE_ID}"
-
-          UPLOAD_RESPONSE=$(mktemp)
-
-          HTTP_CODE=$(curl -sS \
-            -o "$UPLOAD_RESPONSE" \
-            -w "%{http_code}" \
-            -X POST \
-            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/${GITEE_RELEASE_ID}/attach_files" \
-            -H "Authorization: Bearer ${GITEE_TOKEN}" \
-            -F "file=@build/app/outputs/flutter-apk/app-release.apk"
-          )
-
-          echo "Gitee APK Upload HTTP Status: ${HTTP_CODE}"
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "上传 APK 到 Gitee 失败："
-            cat "$UPLOAD_RESPONSE"
-            exit 1
-          fi
-
-          echo "APK 上传到 Gitee 成功"
-          cat "$UPLOAD_RESPONSE"
+      # 4. 创建 Gitee Release 并同步上传 APK
+      - name: Create Release and Upload APK to Gitee
+        uses: nICEnnnnnnnLee/action-gitee-release@master
+        with:
+          gitee_action: create_release
+          gitee_owner: ${{ secrets.GITEE_OWNER }} # 你在 GitHub Secrets 里配置的 Gitee 用户名
+          gitee_repo: ${{ secrets.GITEE_REPO }}   # 你在 GitHub Secrets 里配置的 Gitee 仓库名
+          gitee_token: ${{ secrets.GITEE_TOKEN }} # 你在 GitHub Secrets 里配置的 Gitee Token
+          gitee_tag_name: ${{ env.APP_VERSION }}  # 保持与 GitHub 端一致的 Tag 名字
+          gitee_release_name: Release ${{ env.APP_VERSION }}
+          gitee_release_body: 自动发布的新版本 ${{ env.APP_VERSION }}
+          gitee_target_commitish: main # 如果你的默认分支不是 main 请修改这里
+          gitee_file_name: app-release.apk # 在 Gitee Release 页面展示的附件文件名
+          gitee_file_path: build/app/outputs/flutter-apk/app-release.apk # 本地打包产物的路径
+          gitee_upload_retry_times: 3 # 遇到网络抖动自动重试 [cite: 2.2.2]
