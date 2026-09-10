@@ -52,6 +52,12 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
 
+# 锁定 html 版本：flutter_html 3.0.0 内部调用 package:html 的 matches(Element, String)，
+# 而 html>=0.15.7 将其签名改为 matches(Element, SelectorGroup)，导致编译失败。
+# 降级到 0.15.6（最后保留旧签名的版本）以修复构建。
+dependency_overrides:
+  html: 0.15.6
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
