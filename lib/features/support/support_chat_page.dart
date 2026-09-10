@@ -30,9 +30,15 @@ class _SupportChatPageState extends ConsumerState<SupportChatPage> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  /// 控制器实例缓存：`State.dispose()` 阶段已不能用 `ref`
+  /// （此时 `context.mounted` 为 false，`ref.read` 会抛 StateError），
+  /// 因此按 Riverpod 建议在 initState 里取出并保存。
+  late final SupportChatController _chatController;
+
   @override
   void initState() {
     super.initState();
+    _chatController = ref.read(supportChatControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
@@ -43,7 +49,7 @@ class _SupportChatPageState extends ConsumerState<SupportChatPage> {
 
   @override
   void dispose() {
-    ref.read(supportChatControllerProvider.notifier).leaveChat();
+    _chatController.leaveChat();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
