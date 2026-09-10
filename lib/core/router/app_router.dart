@@ -5,6 +5,7 @@ import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
 import '../../features/log/action_log_page.dart';
+import '../../features/profile/theme_mode_page.dart';
 import '../../features/support/support_chat_page.dart';
 
 /// 路由名称。
@@ -28,6 +29,9 @@ class AppRoutes {
 
   /// 操作日志页。
   static const String actionLog = '/logs/action';
+
+  /// 主题模式设置页。
+  static const String themeMode = '/theme';
 }
 
 /// 命名路由表。
@@ -68,6 +72,11 @@ class AppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const ActionLogPage(),
+        );
+      case AppRoutes.themeMode:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const ThemeModePage(),
         );
       default:
         return null;

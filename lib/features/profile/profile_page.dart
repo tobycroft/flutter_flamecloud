@@ -73,8 +73,9 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.brightness_6_outlined,
             title: '主题模式',
             subtitle: _themeName(themeMode),
-            onTap: () =>
-                ref.read(themeModeControllerProvider.notifier).toggle(),
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.themeMode),
+            ),
           ),
           const SizedBox(height: 12),
           _ActionTile(
