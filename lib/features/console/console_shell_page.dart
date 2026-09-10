@@ -117,11 +117,28 @@ class _MessageIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Badge(
-      isLabelVisible: unread,
-      smallSize: 8,
-      backgroundColor: const Color(0xFFDC2626),
-      child: Icon(active ? Icons.chat_bubble : Icons.chat_bubble_outline),
+    // 不使用框架 Badge：其内部 Stack/Positioned + Semantics 在部分 Flutter
+    // 版本会触发 `!semantics.parentDataDirty` 断言，导致整页（含底栏）空白。
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Icon(active ? Icons.chat_bubble : Icons.chat_bubble_outline),
+        if (unread)
+          const Positioned(
+            top: -2,
+            right: -2,
+            child: SizedBox(
+              width: 8,
+              height: 8,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Color(0xFFDC2626),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

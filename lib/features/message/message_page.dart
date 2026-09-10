@@ -106,23 +106,39 @@ class _ConversationTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: <Widget>[
-              Badge(
-                isLabelVisible: unread,
-                smallSize: 10,
-                backgroundColor: const Color(0xFFDC2626),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFEDD5),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              // 不使用框架 Badge：避免 `!semantics.parentDataDirty` 断言导致整页空白。
+              Stack(
+                clipBehavior: Clip.none,
+                children: <Widget>[
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEDD5),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    ),
+                    child: const Icon(
+                      Icons.headphones,
+                      color: Color(0xFFEA580C),
+                      size: 22,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.headphones,
-                    color: Color(0xFFEA580C),
-                    size: 22,
-                  ),
-                ),
+                  if (unread)
+                    const Positioned(
+                      top: -2,
+                      right: -2,
+                      child: SizedBox(
+                        width: 10,
+                        height: 10,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Color(0xFFDC2626),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 12),
               Expanded(
