@@ -326,13 +326,7 @@ class _NotificationTile extends ConsumerWidget {
     final Color color = _typeColor(item.type);
 
     return InkWell(
-      onTap: () {
-        if (!item.read) {
-          unawaited(
-            ref.read(notificationControllerProvider.notifier).markRead(item.id),
-          );
-        }
-      },
+      onTap: () => unawaited(_handleTap(context, ref)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
@@ -410,6 +404,26 @@ class _NotificationTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// 点击通知：未读先标记已读；标题/正文带 `#工单号` 时跳转工单详情，
+  /// 返回后刷新列表（可能已在详情里回复或关闭工单）。
+  Future<void> _handleTap(BuildContext context, WidgetRef ref) async {
+    if (!item.read) {
+      unawaited(
+        ref.read(notificationControllerProvider.notifier).markRead(item.id),
+      );
+    }
+    final int? ticketId = item.relatedTicketId;
+    if (ticketId == null) {
+      return;
+    }
+    await Navigator.of(context).pushNamed(
+      AppRoutes.ticketDetail,
+      arguments: ticketId,
+    );
+    // 从详情返回后刷新列表，同步已读状态与最新通知。
+    unawaited(ref.read(notificationControllerProvider.notifier).refresh());
   }
 
   /// 类型对应图标：info / success / warning / system。

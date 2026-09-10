@@ -51,4 +51,30 @@ class NotificationItem {
 
   /// 是否已读。
   bool get read => isRead == 1;
+
+  /// 关联的工单 id。
+  ///
+  /// 后端通知表没有 related_type/related_id 字段，与 Vue 端一致，
+  /// 通过标题或正文中的 `#数字` 提取（如「工单 #1 有新的回复」）。
+  int? get relatedTicketId {
+    final RegExp pattern = RegExp(r'#(\d+)');
+    final Iterable<RegExpMatch> titleMatches = pattern.allMatches(title);
+    for (final RegExpMatch match in titleMatches) {
+      final int? id = int.tryParse(match.group(1) ?? '');
+      if (id != null) {
+        return id;
+      }
+    }
+    final String? text = content;
+    if (text == null) {
+      return null;
+    }
+    for (final RegExpMatch match in pattern.allMatches(text)) {
+      final int? id = int.tryParse(match.group(1) ?? '');
+      if (id != null) {
+        return id;
+      }
+    }
+    return null;
+  }
 }
