@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/net/api_exception.dart';
 import '../../data/models/ticket.dart';
 import '../../data/repositories/ticket_repository.dart';
+import 'ticket_summary_controller.dart';
 
 /// 轮询间隔，与 Vue 端 TicketDetailPage 保持一致（5000ms）。
 const Duration _kPollInterval = Duration(seconds: 5);
@@ -143,6 +144,7 @@ class TicketDetailController extends Notifier<TicketDetailState> {
     }
     try {
       await ref.read(ticketRepositoryProvider).close(id: id);
+      ref.invalidate(pendingTicketCountProvider);
       _stopPolling();
       await _fetchDetail(id);
     } on Exception catch (error) {
@@ -162,6 +164,7 @@ class TicketDetailController extends Notifier<TicketDetailState> {
     }
     try {
       await ref.read(ticketRepositoryProvider).reopen(id: id);
+      ref.invalidate(pendingTicketCountProvider);
       await _fetchDetail(id);
       _startPollingIfNeeded(id);
     } on Exception catch (error) {

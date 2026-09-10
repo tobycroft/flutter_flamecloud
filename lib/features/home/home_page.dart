@@ -11,6 +11,7 @@ import '../../data/models/news.dart';
 import '../../data/models/user_info.dart';
 import '../auth/session_controller.dart';
 import '../news/news_controller.dart';
+import '../ticket/ticket_summary_controller.dart';
 
 /// 首页 tab（控制台仪表盘）。
 ///
@@ -33,8 +34,10 @@ class HomePage extends ConsumerWidget {
         title: const Text('首页'),
       ),
       body: RefreshIndicator(
-        onRefresh: () =>
-            ref.read(sessionControllerProvider.notifier).refreshUser(),
+        onRefresh: () {
+          ref.invalidate(pendingTicketCountProvider);
+          return ref.read(sessionControllerProvider.notifier).refreshUser();
+        },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
@@ -119,17 +122,23 @@ class _Activity {
 class _TodoItem {
   const _TodoItem({
     required this.title,
-    required this.count,
+    this.count = 0,
     required this.icon,
     this.route,
+    this.liveTicketCount = false,
   });
 
   final String title;
+
+  /// 静态数量；[liveTicketCount] 为真时该值仅作为加载中的占位。
   final int count;
   final IconData icon;
 
   /// 点击跳转的路由，为 null 时提示「搬迁中」。
   final String? route;
+
+  /// 为真时数量取自后端聚合计数（未关闭且未删除的工单数），不写死。
+  final bool liveTicketCount;
 }
 
 /// 资源概览（与 Vue 端静态值保持一致，后端暂无统计接口）。
@@ -180,9 +189,9 @@ const List<_TodoItem> _todoItems = <_TodoItem>[
   ),
   _TodoItem(
     title: '待回复工单',
-    count: 2,
     icon: Icons.confirmation_number_outlined,
     route: AppRoutes.ticketList,
+    liveTicketCount: true,
   ),
 ];
 
@@ -556,11 +565,14 @@ class _ServiceCard extends StatelessWidget {
 }
 
 /// 待办事项。
-class _TodoSection extends StatelessWidget {
+///
+/// 「待回复工单」的数量来自后端聚合计数（未结案关闭且未删除），
+/// 工单状态变化后控制器会失效该 provider，回到首页即为最新值。
+class _TodoSection extends ConsumerWidget {
   const _TodoSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
@@ -585,15 +597,19 @@ class _TodoSection extends StatelessWidget {
   }
 }
 
-class _TodoTile extends StatelessWidget {
+class _TodoTile extends ConsumerWidget {
   const _TodoTile({required this.item, required this.isDark});
 
   final _TodoItem item;
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool hasRoute = item.route != null;
+    // 只有工单待办取实时计数，其余仍用静态值（后端暂无对应统计接口）。
+    final int count = item.liveTicketCount
+        ? ref.watch(pendingTicketCountProvider).value ?? item.count
+        : item.count;
 
     return InkWell(
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -619,19 +635,17 @@ class _TodoTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: item.count > 0
+                color: count > 0
                     ? AppColors.flame500.withValues(alpha: 0.12)
                     : context.surfaces.inset,
                 borderRadius: BorderRadius.circular(AppTheme.radiusSm),
               ),
               child: Text(
-                '${item.count}',
+                '$count',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: item.count > 0
-                      ? AppColors.flame500
-                      : _tertiaryColor(isDark),
+                  color: count > 0 ? AppColors.flame500 : _tertiaryColor(isDark),
                 ),
               ),
             ),

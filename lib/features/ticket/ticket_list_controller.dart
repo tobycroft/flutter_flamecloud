@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/net/api_exception.dart';
 import '../../data/models/ticket.dart';
 import '../../data/repositories/ticket_repository.dart';
+import 'ticket_summary_controller.dart';
 
 /// 工单列表状态。
 class TicketListState {
@@ -129,15 +130,17 @@ class TicketListController extends Notifier<TicketListState> {
     await _fetch(page: page);
   }
 
-  /// 删除工单，成功后回到第一页重新拉取。
-  Future<void> deleteTicket(TicketItem ticket) async {
-    await ref.read(ticketRepositoryProvider).deleteTicket(id: ticket.id);
-    await _fetch(page: 1);
+  /// 关闭工单（状态置 3），成功后刷新列表。
+  Future<void> close(TicketItem ticket) async {
+    await ref.read(ticketRepositoryProvider).close(id: ticket.id);
+    ref.invalidate(pendingTicketCountProvider);
+    await refresh();
   }
 
   /// 重启已关闭工单，成功后刷新列表。
   Future<void> reopen(TicketItem ticket) async {
     await ref.read(ticketRepositoryProvider).reopen(id: ticket.id);
+    ref.invalidate(pendingTicketCountProvider);
     await refresh();
   }
 

@@ -65,12 +65,12 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _deleteTicket(TicketItem ticket) async {
+  Future<void> _closeTicket(TicketItem ticket) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('删除工单'),
-        content: Text('确定删除工单 #${ticket.id} 吗？删除后不可恢复。'),
+        title: const Text('关闭工单'),
+        content: Text('确定要结案关闭工单 #${ticket.id} 吗？关闭后可重新开启。'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -78,10 +78,7 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              '删除',
-              style: TextStyle(color: Color(0xFFDC2626)),
-            ),
+            child: const Text('关闭'),
           ),
         ],
       ),
@@ -90,17 +87,15 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
       return;
     }
     try {
-      await ref
-          .read(ticketListControllerProvider.notifier)
-          .deleteTicket(ticket);
+      await ref.read(ticketListControllerProvider.notifier).close(ticket);
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('工单已删除')));
+        ..showSnackBar(const SnackBar(content: Text('工单已关闭')));
     } on Exception catch (error) {
-      _showError(error, '删除失败');
+      _showError(error, '关闭失败');
     }
   }
 
@@ -192,7 +187,7 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
                 child: _TicketCard(
                   ticket: item,
                   onTap: () => unawaited(_openDetail(item.id)),
-                  onDelete: () => unawaited(_deleteTicket(item)),
+                  onClose: () => unawaited(_closeTicket(item)),
                   onReopen: () => unawaited(_reopen(item)),
                 ),
               ),
@@ -348,13 +343,13 @@ class _TicketCard extends StatelessWidget {
   const _TicketCard({
     required this.ticket,
     required this.onTap,
-    required this.onDelete,
+    required this.onClose,
     required this.onReopen,
   });
 
   final TicketItem ticket;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback onClose;
   final VoidCallback onReopen;
 
   /// 长按弹出操作菜单，选中后回调对应动作。
@@ -386,14 +381,12 @@ class _TicketCard extends StatelessWidget {
           const PopupMenuItem<String>(
             value: 'reopen',
             child: Text('重启工单'),
+          )
+        else
+          const PopupMenuItem<String>(
+            value: 'close',
+            child: Text('关闭工单'),
           ),
-        const PopupMenuItem<String>(
-          value: 'delete',
-          child: Text(
-            '删除工单',
-            style: TextStyle(color: Color(0xFFDC2626)),
-          ),
-        ),
       ],
     );
     if (action == null) {
@@ -402,10 +395,10 @@ class _TicketCard extends StatelessWidget {
     switch (action) {
       case 'detail':
         onTap();
+      case 'close':
+        onClose();
       case 'reopen':
         onReopen();
-      case 'delete':
-        onDelete();
     }
   }
 
