@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -172,7 +173,7 @@ class _TypeChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? primary
-                : (isDark ? const Color(0xFF151A3A) : Colors.white),
+                : (context.surfaces.inset),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: selected

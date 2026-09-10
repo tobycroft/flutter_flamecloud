@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_surfaces.dart';
 
 /// 应用主题。
 ///
@@ -25,25 +26,23 @@ class AppTheme {
 
   /// OLED 纯黑主题。
   ///
-  /// 表面与背景使用纯黑（Colors.black），配合 OLED 屏幕可完全熄灭
-  /// 像素以省电；输入框填充与描边用极深灰替代 dark 色板以保持层次。
+  /// 页面底色为纯黑（Colors.black），组件面改用 VS Code 风格的深灰，
+  /// 既让 OLED 屏幕熄灭底色像素省电，又保留组件的层次。
   static ThemeData oled() => _base(Brightness.dark, oled: true);
 
   static ThemeData _base(Brightness brightness, {bool oled = false}) {
     final bool isDark = brightness == Brightness.dark;
-    final Color surface = isDark
-        ? (oled ? Colors.black : AppColors.dark500)
-        : Colors.white;
-    final Color scaffold = isDark
-        ? (oled ? Colors.black : AppColors.dark700)
-        : AppColors.flame50;
-    // 暗色下的输入框填充与描边；OLED 用极深灰保留层次感。
-    final Color inputFill = isDark
-        ? (oled ? const Color(0xFF0D0D0D) : AppColors.dark400)
-        : const Color(0xFFF9FAFB);
-    final Color inputBorder = isDark
-        ? (oled ? const Color(0xFF262626) : AppColors.dark300)
-        : const Color(0xFFE5E7EB);
+    // 三级表面色：卡片 / 内层容器 / 描边。
+    final AppSurfaces surfaces = !isDark
+        ? const AppSurfaces.light()
+        : (oled ? const AppSurfaces.oled() : const AppSurfaces.dark());
+    final Color surface = surfaces.panel;
+    // 页面底色：深色为中性深灰，OLED 为纯黑；两者都与组件面拉开明度差。
+    final Color scaffold = !isDark
+        ? AppColors.flame50
+        : (oled ? Colors.black : AppColors.scaffoldDark);
+    final Color inputFill = surfaces.inset;
+    final Color inputBorder = surfaces.line;
 
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: AppColors.flame500,
@@ -60,6 +59,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
+      extensions: <ThemeExtension<dynamic>>{surfaces},
       scaffoldBackgroundColor: scaffold,
       splashFactory: InkSparkle.splashFactory,
       inputDecorationTheme: InputDecorationTheme(
@@ -112,7 +112,7 @@ class AppTheme {
         foregroundColor: scheme.onSurface,
       ),
       dividerTheme: DividerThemeData(
-        color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF1F5F9),
+        color: surfaces.line,
         space: 1,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(

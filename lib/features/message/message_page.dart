@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/router/app_router.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/chat_message.dart';
 import '../../data/models/notification.dart';
@@ -96,7 +96,7 @@ class _ConversationTile extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -285,7 +285,7 @@ class _NotificationCard extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: ListView.builder(
         shrinkWrap: true,

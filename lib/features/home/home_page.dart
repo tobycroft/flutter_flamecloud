@@ -1,3 +1,4 @@
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,7 +149,7 @@ class _EntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),

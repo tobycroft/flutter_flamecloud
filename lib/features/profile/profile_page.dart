@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -149,7 +150,7 @@ class _ProfileHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.dark500 : Colors.white,
+        color: context.surfaces.panel,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
       ),
       child: Row(
@@ -268,7 +269,7 @@ class _SwitchTile extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -336,7 +337,7 @@ class _ActionTile extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),

@@ -66,6 +66,18 @@ class AppColors {
   /// 暗色系 900。
   static const dark900 = Color(0xFF040510);
 
+  /// 深色模式页面底色：中性「非常深的灰」，与组件面的藏青色形成区分。
+  static const scaffoldDark = Color(0xFF121212);
+
+  /// OLED 模式组件面（卡片/弹层/底栏），VS Code 风格深灰。
+  static const oledPanel = Color(0xFF1F1F1F);
+
+  /// OLED 模式二级容器面（输入框/chip 内层）。
+  static const oledInset = Color(0xFF262626);
+
+  /// OLED 模式描边与分隔线。
+  static const oledLine = Color(0xFF333333);
+
   /// Tailwind orange-50，登录页渐变末端。
   static const orange50 = Color(0xFFFFF7ED);
 

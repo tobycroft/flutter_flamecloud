@@ -328,9 +328,10 @@ class _LoginCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.dark500.withValues(alpha: 0.8)
-            : Colors.white,
+        color: Theme.of(context)
+            .colorScheme
+            .surface
+            .withValues(alpha: isDark ? 0.85 : 1),
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(
           color: isDark

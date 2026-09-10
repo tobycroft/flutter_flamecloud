@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -284,7 +285,7 @@ class _TypeCard extends StatelessWidget {
     return Material(
       color: selected
           ? AppColors.flame500.withValues(alpha: 0.08)
-          : (isDark ? AppColors.dark500 : Colors.white),
+          : (context.surfaces.panel),
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -296,7 +297,7 @@ class _TypeCard extends StatelessWidget {
             border: Border.all(
               color: selected
                   ? AppColors.flame500
-                  : (isDark ? AppColors.dark300 : const Color(0xFFE5E7EB)),
+                  : (context.surfaces.line),
               width: selected ? 1.6 : 1,
             ),
           ),

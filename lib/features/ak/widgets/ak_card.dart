@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,7 +42,7 @@ class AkCard extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 8, 4),

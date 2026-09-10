@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -362,7 +363,7 @@ class _TicketInfoCard extends StatelessWidget {
         attachments.isNotEmpty || links.isNotEmpty || contacts.isNotEmpty;
 
     return Material(
-      color: isDark ? AppColors.dark500 : Colors.white,
+      color: context.surfaces.panel,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -525,15 +526,13 @@ class _AttachmentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.dark400 : const Color(0xFFF9FAFB),
+        color: context.surfaces.inset,
         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         border: Border.all(
-          color: isDark ? AppColors.dark300 : const Color(0xFFE5E7EB),
+          color: context.surfaces.line,
         ),
       ),
       child: Row(
@@ -574,7 +573,7 @@ class _ReplyCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.dark500 : Colors.white,
+        color: context.surfaces.panel,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border(
           left: BorderSide(color: accent, width: 3),
@@ -685,7 +684,7 @@ class _ReplyBar extends ConsumerWidget {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        color: isDark ? AppColors.dark500 : Colors.white,
+        color: context.surfaces.panel,
         child: Text(
           '工单已结案，如需继续沟通请重启工单或提交新工单',
           textAlign: TextAlign.center,
@@ -700,10 +699,10 @@ class _ReplyBar extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.dark500 : Colors.white,
+        color: context.surfaces.panel,
         border: Border(
           top: BorderSide(
-            color: isDark ? AppColors.dark300 : const Color(0xFFE5E7EB),
+            color: context.surfaces.line,
           ),
         ),
       ),

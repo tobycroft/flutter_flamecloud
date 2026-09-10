@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -249,10 +250,10 @@ class _SecretField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.dark400 : const Color(0xFFF9FAFB),
+        color: context.surfaces.inset,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
-          color: isDark ? AppColors.dark300 : const Color(0xFFE5E7EB),
+          color: context.surfaces.line,
         ),
       ),
       child: Row(

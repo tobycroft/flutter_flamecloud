@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,30 +73,31 @@ class ThemeModePage extends ConsumerWidget {
       mode: AppThemeMode.dark,
       icon: Icons.dark_mode_outlined,
       title: '深色',
-      summary: '始终深色界面',
-      description: '全程使用深色主题，页面底色与卡片均为深蓝黑色系，'
-          '保留层次区分。夜间或暗光环境下更护眼，长时间操作不易疲劳。',
-      background: AppColors.dark700,
+      summary: '深灰底 + 深蓝黑组件',
+      description: '页面底色为中性深灰，卡片、输入框等组件沿用深蓝黑色系，'
+          '底色与组件有明显层次。夜间或暗光环境下更护眼，长时间操作不易疲劳。',
+      background: AppColors.scaffoldDark,
       surface: AppColors.dark500,
     ),
     _ThemeOption(
       mode: AppThemeMode.oled,
       icon: Icons.brightness_2_outlined,
       title: 'OLED 纯黑',
-      summary: '深色 + 纯黑背景',
-      description: '在深色主题基础上把背景与卡片改为纯黑、输入框用极深灰，'
-          'OLED 屏幕对应像素可直接熄灭，更省电、对比度更强。'
+      summary: '纯黑底 + 深灰组件',
+      description: '底色为纯黑，卡片与输入框改用 VS Code 风格的深灰，'
+          'OLED 屏幕对应像素可直接熄灭，更省电且对比清晰。'
           '适合 OLED 屏幕设备或深夜使用。',
       background: Colors.black,
-      surface: Colors.black,
+      surface: AppColors.oledPanel,
     ),
     _ThemeOption(
       mode: AppThemeMode.system,
       icon: Icons.settings_brightness_outlined,
       title: '跟随系统',
       summary: '自动切换深浅色',
-      description: '跟随手机系统的深浅色设置自动切换；系统开启深色时使用深色主题，'
-          '不额外使用 OLED 纯黑。适合希望与系统外观保持一致的场景。',
+      description: '跟随手机系统的深浅色设置自动切换；系统开启深色时使用深色主题'
+          '（深灰底 + 深蓝黑组件），不额外使用 OLED 纯黑。'
+          '适合希望与系统外观保持一致的场景。',
       background: AppColors.flame50,
       surface: Colors.white,
       gradient: LinearGradient(
@@ -164,10 +166,10 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color surface = isDark ? AppColors.dark500 : Colors.white;
+    final Color surface = context.surfaces.panel;
     final Color border = selected
         ? AppColors.flame500
-        : (isDark ? AppColors.dark300 : const Color(0xFFE5E7EB));
+        : (context.surfaces.line);
 
     return Material(
       color: surface,
@@ -309,11 +311,7 @@ class _PreviewChip extends StatelessWidget {
           gradient: gradient,
           color: color,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-          border: Border.all(
-            color: isDark
-                ? AppColors.dark300
-                : Colors.black.withValues(alpha: 0.08),
-          ),
+          border: Border.all(color: context.surfaces.line),
         ),
       ),
     );

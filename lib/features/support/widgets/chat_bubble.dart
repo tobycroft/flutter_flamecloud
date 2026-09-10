@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_surfaces.dart';
 import '../../../data/models/chat_message.dart';
 
 /// 聊天气泡。
@@ -57,7 +58,7 @@ class ChatBubble extends StatelessWidget {
                     color: isSelf
                         ? const Color(0xFF3B82F6)
                         : (isDark
-                            ? AppColors.dark400
+                            ? context.surfaces.inset
                             : const Color(0xFFF3F4F6)),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
