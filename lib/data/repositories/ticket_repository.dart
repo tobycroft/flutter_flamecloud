@@ -221,8 +221,7 @@ class TicketRepository {
   }
 
   /// 状态参数序列化：后端要求字符串，无筛选项时省略该字段。
-  static String? _statusValue(int? status) =>
-      status == null ? null : status.toString();
+  static String? _statusValue(int? status) => status?.toString();
 
   /// 将任意数组解析为指定模型列表。
   static List<T> _toList<T>(
