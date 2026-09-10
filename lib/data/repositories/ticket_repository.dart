@@ -13,8 +13,9 @@ import '../models/ticket.dart';
 ///
 /// 搬迁自 vue_flamecloud 的工单模块（TicketListPage / TicketDetailPage /
 /// TicketSubmitPage），并与 go_flamecloud 的实现对齐，注意以下后端约束：
-/// - 列表必须用 POST：GET 分支下 `page`/`page_size` 会被忽略，恒为 1/20；
-/// - detail / poll 走 GET，其余写操作走 POST 表单；
+/// - 列表与详情必须用 POST：列表的 GET 分支下 `page`/`page_size` 恒为 1/20；
+///   详情的 GET 分支返回的 data 中**缺少 `info` 字段**，只有 POST 才完整；
+/// - poll 走 GET，其余写操作走 POST 表单；
 /// - 数组参数（attachments / links / contacts / ids）用单字段 JSON 字符串。
 class TicketRepository {
   const TicketRepository(this._dio);
@@ -65,19 +66,29 @@ class TicketRepository {
     }
   }
 
-  /// 拉取工单详情，对应 `GET /v1/ticket/detail?id=`。
+  /// 拉取工单详情，对应 `POST /v1/ticket/detail`。
+  ///
+  /// 后端 GET 分支有个坑：返回的 data 里**没有 `info` 字段**（只有 replies），
+  /// 只有 POST 才返回完整的 info / attachments / links / contacts，
+  /// 因此这里走 POST（与列表一致）。
   Future<TicketDetail> fetchDetail({required int id}) async {
     try {
-      final Response<dynamic> response = await _dio.get<dynamic>(
+      final Response<dynamic> response = await _dio.post<dynamic>(
         ApiEndpoints.ticket.detail,
-        queryParameters: <String, Object?>{'id': id},
+        data: FormData.fromMap(<String, Object?>{'id': id}),
       );
       final Map<String, dynamic>? data = _unwrap(response).asMap;
-      if (data == null || data['info'] is! Map) {
+      if (data == null) {
+        throw const ApiFormatException();
+      }
+      // 容错：若后端哪天直接把工单主体平铺在 data 上（缺少 info 包裹），
+      // 只要带 id 就当作 info 解析，避免整页空白。
+      final Object? rawInfo = data['info'] is Map ? data['info'] : (data['id'] == null ? null : data);
+      if (rawInfo is! Map) {
         throw const ApiFormatException();
       }
       return TicketDetail(
-        info: TicketInfo.fromMap((data['info'] as Map).cast<String, dynamic>()),
+        info: TicketInfo.fromMap(rawInfo.cast<String, dynamic>()),
         replies: _toList(data['replies'], TicketReply.fromMap),
         attachments: TicketAttachment.fromList(data['attachments']),
         links: _toList(data['links'], TicketLink.fromMap),

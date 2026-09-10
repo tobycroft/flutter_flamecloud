@@ -80,6 +80,13 @@ class TicketDetailState {
 class TicketDetailController extends Notifier<TicketDetailState> {
   Timer? _pollTimer;
   String _cursor = '';
+  DateTime? _lastFetchAt;
+
+  /// 无时间戳游标时的最小重拉间隔。
+  ///
+  /// 后端在客户端游标为空（工单从未写入 last_reply_at）时恒返回
+  /// `has_new=true`，若不节流会每 5 秒全量重拉一次详情。
+  static const Duration _kMinSilentRefresh = Duration(seconds: 15);
 
   @override
   TicketDetailState build() {
@@ -259,6 +266,14 @@ class TicketDetailController extends Notifier<TicketDetailState> {
       if (!ref.mounted || !result.hasNew) {
         return;
       }
+      if (result.lastReplyAt.isEmpty) {
+        final DateTime now = DateTime.now();
+        final DateTime? last = _lastFetchAt;
+        if (last != null && now.difference(last) < _kMinSilentRefresh) {
+          return;
+        }
+      }
+      _lastFetchAt = DateTime.now();
       await _fetchDetail(id);
     } on Exception {
       // 轮询失败静默忽略，等待下一次间隔重试。
