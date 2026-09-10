@@ -7,8 +7,10 @@ import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_surfaces.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/models/news.dart';
 import '../../data/models/user_info.dart';
 import '../auth/session_controller.dart';
+import '../news/news_controller.dart';
 
 /// 首页 tab（控制台仪表盘）。
 ///
@@ -130,17 +132,6 @@ class _TodoItem {
   final String? route;
 }
 
-/// 公告项。
-class _Announcement {
-  const _Announcement({
-    required this.title,
-    required this.date,
-  });
-
-  final String title;
-  final String date;
-}
-
 /// 资源概览（与 Vue 端静态值保持一致，后端暂无统计接口）。
 const List<_ResourceStat> _resourceStats = <_ResourceStat>[
   _ResourceStat(title: '云服务器', value: '24', unit: '台', icon: Icons.dns_outlined),
@@ -193,13 +184,6 @@ const List<_TodoItem> _todoItems = <_TodoItem>[
     icon: Icons.confirmation_number_outlined,
     route: AppRoutes.ticketList,
   ),
-];
-
-/// 新闻公告。
-const List<_Announcement> _announcements = <_Announcement>[
-  _Announcement(title: '火焰云华东可用区B正式上线', date: '2025-07-20'),
-  _Announcement(title: 'ECS实例规格升级通知', date: '2025-07-15'),
-  _Announcement(title: '对象存储OSS降价通知', date: '2025-07-10'),
 ];
 
 /// 把后端返回的时间字符串格式化为「今天 HH:MM」或「YYYY-MM-DD HH:MM」。
@@ -809,28 +793,74 @@ class _VisitChip extends StatelessWidget {
   }
 }
 
-/// 新闻公告。
-class _Announcements extends StatelessWidget {
+/// 新闻公告（首页展示，从 `newsControllerProvider` 拉取最新几条）。
+class _Announcements extends ConsumerStatefulWidget {
   const _Announcements();
+
+  @override
+  ConsumerState<_Announcements> createState() => _AnnouncementsState();
+}
+
+class _AnnouncementsState extends ConsumerState<_Announcements> {
+  @override
+  void initState() {
+    super.initState();
+    // 进入首页时拉取一次最新公告（无登录态也可访问公开接口）。
+    Future<void>.microtask(
+      () => ref.read(newsControllerProvider.notifier).load(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final NewsState state = ref.watch(newsControllerProvider);
+    final List<NewsItem> items = state.items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const _SectionTitle('新闻公告'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            const _SectionTitle('新闻公告'),
+            TextButton(
+              onPressed: () => AppRoutes.toNamed(context, AppRoutes.newsList),
+              child: Text(
+                '更多',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.flame500,
+                ),
+              ),
+            ),
+          ],
+        ),
         Material(
           color: context.surfaces.panel,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           child: Column(
             children: <Widget>[
-              for (int i = 0; i < _announcements.length; i++) ...<Widget>[
-                if (i > 0)
-                  Divider(height: 1, color: context.surfaces.line),
-                _AnnouncementTile(item: _announcements[i], isDark: isDark),
-              ],
+              if (state.loading && items.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (!state.loading && items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      '暂无公告',
+                      style: TextStyle(fontSize: 13, color: _tertiaryColor(isDark)),
+                    ),
+                  ),
+                )
+              else
+                for (int i = 0; i < items.length; i++) ...<Widget>[
+                  if (i > 0) Divider(height: 1, color: context.surfaces.line),
+                  _AnnouncementTile(item: items[i], isDark: isDark),
+                ],
             ],
           ),
         ),
@@ -842,21 +872,25 @@ class _Announcements extends StatelessWidget {
 class _AnnouncementTile extends StatelessWidget {
   const _AnnouncementTile({required this.item, required this.isDark});
 
-  final _Announcement item;
+  final NewsItem item;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      onTap: () => _comingSoon(context, '公告详情'),
+      onTap: () => AppRoutes.toNamed(
+        context,
+        AppRoutes.newsDetail,
+        pathParameters: <String, String>{'id': '${item.id}'},
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: <Widget>[
             Expanded(
               child: Text(
-                item.title,
+                item.title ?? '',
                 style: const TextStyle(fontSize: 14),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -864,7 +898,7 @@ class _AnnouncementTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              item.date,
+              item.dateLabel,
               style: TextStyle(
                 fontSize: 12,
                 color: _tertiaryColor(isDark),

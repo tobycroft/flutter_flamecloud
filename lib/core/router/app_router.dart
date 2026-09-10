@@ -5,6 +5,8 @@ import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
 import '../../features/log/action_log_page.dart';
+import '../../features/news/news_detail_page.dart';
+import '../../features/news/news_list_page.dart';
 import '../../features/profile/theme_mode_page.dart';
 import '../../features/support/support_chat_page.dart';
 import '../../features/ticket/ticket_detail_page.dart';
@@ -44,6 +46,12 @@ class AppRoutes {
 
   /// 提交工单页。
   static const String ticketSubmit = '/ticket/submit';
+
+  /// 新闻公告列表页。
+  static const String newsList = '/news/list';
+
+  /// 新闻公告详情页，pathParameters 传入公告 id。
+  static const String newsDetail = '/news/detail';
 }
 
 /// 命名路由表。
@@ -105,6 +113,18 @@ class AppRouter {
           settings: settings,
           builder: (_) => TicketDetailPage(
             ticketId: settings.arguments is int ? settings.arguments as int : 0,
+          ),
+        );
+      case AppRoutes.newsList:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const NewsListPage(),
+        );
+      case AppRoutes.newsDetail:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => NewsDetailPage(
+            id: settings.arguments is int ? settings.arguments as int : 0,
           ),
         );
       default:

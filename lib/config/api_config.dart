@@ -78,6 +78,9 @@ class ApiEndpoints {
 
   /// 云服务器。
   static const ecs = _EcsEndpoints();
+
+  /// 新闻公告（公开接口，无需登录）。
+  static const news = _NewsEndpoints();
 }
 
 /// 验证码接口。
@@ -363,4 +366,15 @@ class _EcsOrderEndpoints {
 
   /// 详情。
   final String detail = '/v1/ecs/order/detail';
+}
+
+/// 新闻公告接口（公开，无需登录；正文 content 为富文本 HTML）。
+class _NewsEndpoints {
+  const _NewsEndpoints();
+
+  /// 列表，对应 `GET /v1/news/list`。
+  final String list = '/v1/news/list';
+
+  /// 详情，对应 `GET /v1/news/detail`（含富文本 content）。
+  final String detail = '/v1/news/detail';
 }
