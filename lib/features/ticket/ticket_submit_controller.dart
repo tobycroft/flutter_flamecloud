@@ -37,8 +37,8 @@ class TicketSubmitState {
 
 /// 提交工单控制器。
 ///
-/// 搬迁自 vue_flamecloud/TicketSubmitPage：标准工单走 `/submit`，
-/// 在线客服走 `/submit_chat`（后端自动落 chat 类型，跳过分类与紧急性）。
+/// 搬迁自 vue_flamecloud/TicketSubmitPage：只提交标准工单（`/submit`）。
+/// 在线客服已独立为聊天模块，工单区不再创建 chat 类型工单。
 class TicketSubmitController extends Notifier<TicketSubmitState> {
   @override
   TicketSubmitState build() {
@@ -60,19 +60,6 @@ class TicketSubmitController extends Notifier<TicketSubmitState> {
           otherCategory: otherCategory,
           contactPhone: contactPhone,
         ));
-  }
-
-  /// 以会话方式提交（在线客服），返回新工单 id。
-  Future<int> submitChat({
-    required String description,
-    String? contactPhone,
-  }) async {
-    return _run(
-      () => ref.read(ticketRepositoryProvider).submitChat(
-            description: description.trim(),
-            contactPhone: contactPhone,
-          ),
-    );
   }
 
   /// 统一提交流程：置 submitting、捕获异常并回填错误信息。

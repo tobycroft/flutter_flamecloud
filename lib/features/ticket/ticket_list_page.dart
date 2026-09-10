@@ -342,6 +342,8 @@ class _FilterChip extends StatelessWidget {
 }
 
 /// 单个工单卡片：描述、类型、分类、状态与时间。
+///
+/// 操作入口不再放三个点，改为长按卡片弹出上下文菜单（菜单锚定在卡片右上角）。
 class _TicketCard extends StatelessWidget {
   const _TicketCard({
     required this.ticket,
@@ -355,10 +357,61 @@ class _TicketCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onReopen;
 
+  /// 长按弹出操作菜单，选中后回调对应动作。
+  Future<void> _showContextMenu(BuildContext context) async {
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    final RenderBox? overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (box == null || overlay == null || !box.attached || !overlay.attached) {
+      return;
+    }
+    // 锚点取卡片右上角，位置与原三个点菜单一致。
+    final Offset anchor =
+        box.localToGlobal(Offset(box.size.width, 0)) + const Offset(-8, 8);
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(anchor, anchor),
+      Offset.zero & overlay.size,
+    );
+
+    final bool closed = ticket.status == 3;
+    final String? action = await showMenu<String>(
+      context: context,
+      position: position,
+      items: <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'detail',
+          child: Text('查看详情'),
+        ),
+        if (closed)
+          const PopupMenuItem<String>(
+            value: 'reopen',
+            child: Text('重启工单'),
+          ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Text(
+            '删除工单',
+            style: TextStyle(color: Color(0xFFDC2626)),
+          ),
+        ),
+      ],
+    );
+    if (action == null) {
+      return;
+    }
+    switch (action) {
+      case 'detail':
+        onTap();
+      case 'reopen':
+        onReopen();
+      case 'delete':
+        onDelete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final bool closed = ticket.status == 3;
 
     return Material(
       color: context.surfaces.panel,
@@ -366,6 +419,7 @@ class _TicketCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         onTap: onTap,
+        onLongPress: () => unawaited(_showContextMenu(context)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -387,37 +441,6 @@ class _TicketCard extends StatelessWidget {
                   _Tag(
                     text: TicketMeta.typeText(ticket.ticketType),
                     color: TicketMeta.typeColor(ticket.ticketType),
-                  ),
-                  const Spacer(),
-                  PopupMenuButton<String>(
-                    padding: EdgeInsets.zero,
-                    iconSize: 20,
-                    onSelected: (String value) {
-                      if (value == 'delete') {
-                        onDelete();
-                      } else if (value == 'reopen') {
-                        onReopen();
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'refresh',
-                        enabled: false,
-                        child: Text('更多操作'),
-                      ),
-                      if (closed)
-                        const PopupMenuItem<String>(
-                          value: 'reopen',
-                          child: Text('重启工单'),
-                        ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Text(
-                          '删除工单',
-                          style: TextStyle(color: Color(0xFFDC2626)),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

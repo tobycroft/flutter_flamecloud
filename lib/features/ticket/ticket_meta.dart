@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class TicketMeta {
   const TicketMeta._();
 
-  /// 共 11 个分类，含聊天工单专用的 chat。
+  /// 共 10 个分类，在线客服已独立为聊天模块，工单不再使用 chat 分类。
   static const List<(String, String)> categories = <(String, String)>[
     ('ecs', 'ECS'),
     ('oss', '文件存储'),
@@ -19,7 +19,6 @@ class TicketMeta {
     ('elastic_ip', '弹性 IP'),
     ('auto_scale', '负载均衡'),
     ('other', '其他'),
-    ('chat', '在线客服'),
   ];
 
   /// 三档紧急性，值为后端枚举。

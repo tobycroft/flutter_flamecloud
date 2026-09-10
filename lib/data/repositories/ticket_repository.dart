@@ -153,28 +153,6 @@ class TicketRepository {
     }
   }
 
-  /// 以会话方式提交工单，对应 `POST /v1/ticket/submit_chat`。
-  ///
-  /// 后端固定写 `category=chat`、`urgency=consult`、`ticket_type=chat`，
-  /// 只需传描述与联系手机。返回新工单 id。
-  Future<int> submitChat({
-    required String description,
-    String? contactPhone,
-  }) async {
-    try {
-      final Response<dynamic> response = await _dio.post<dynamic>(
-        ApiEndpoints.ticket.submitChat,
-        data: FormData.fromMap(<String, Object?>{
-          'description': description,
-          'contact_phone': ?contactPhone,
-        }),
-      );
-      return JsonValue.integer(_unwrap(response).asMap?['id']) ?? 0;
-    } on DioException catch (error) {
-      throw error.toAppException();
-    }
-  }
-
   /// 追加回复，对应 `POST /v1/ticket/reply`。
   ///
   /// 注意后端会把工单状态置为 1（客户发送），即使工单已关闭也会被改回。

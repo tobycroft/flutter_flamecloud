@@ -246,9 +246,6 @@ class _TicketEndpoints {
   /// 提交。
   final String submit = '/v1/ticket/submit';
 
-  /// 以会话方式提交。
-  final String submitChat = '/v1/ticket/submit_chat';
-
   /// 详情。
   final String detail = '/v1/ticket/detail';
 

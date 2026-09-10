@@ -133,8 +133,8 @@ class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
                     initialValue: category,
                     decoration: const InputDecoration(labelText: '问题分类'),
                     items: <DropdownMenuItem<String>>[
-                      for (final (String, String) item in TicketMeta.categories
-                          .where((element) => element.$1 != 'chat'))
+                      for (final (String, String) item
+                          in TicketMeta.categories)
                         DropdownMenuItem<String>(
                           value: item.$1,
                           child: Text(item.$2),
