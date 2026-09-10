@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/api_config.dart';
 import '../../core/net/api_envelope.dart';
 import '../../core/net/api_exception.dart';
+import '../../core/net/dio_client.dart';
 import '../../core/net/http_providers.dart';
 import '../../core/utils/json_value.dart';
 import '../models/news.dart';

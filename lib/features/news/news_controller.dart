@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/net/api_exception.dart';
-import '../models/news.dart';
-import '../repositories/news_repository.dart';
+import '../../data/models/news.dart';
+import '../../data/repositories/news_repository.dart';
 
 /// 新闻公告首页列表状态。
 class NewsState {
@@ -67,7 +67,6 @@ final NotifierProvider<NewsController, NewsState> newsControllerProvider =
     NotifierProvider<NewsController, NewsState>(NewsController.new);
 
 /// 新闻公告详情 Provider（按 id 缓存，避免重复请求）。
-final FutureProviderFamily<NewsItem, int> newsDetailProvider =
-    FutureProvider.family<NewsItem, int>((Ref ref, int id) {
-  return ref.read(newsRepositoryProvider).fetchDetail(id: id);
-});
+final newsDetailProvider = FutureProvider.family<NewsItem, int>(
+  (Ref ref, int id) => ref.read(newsRepositoryProvider).fetchDetail(id: id),
+);

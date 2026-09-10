@@ -825,7 +825,7 @@ class _AnnouncementsState extends ConsumerState<_Announcements> {
           children: <Widget>[
             const _SectionTitle('新闻公告'),
             TextButton(
-              onPressed: () => AppRoutes.toNamed(context, AppRoutes.newsList),
+              onPressed: () => Navigator.of(context).pushNamed(AppRoutes.newsList),
               child: Text(
                 '更多',
                 style: TextStyle(
@@ -879,10 +879,9 @@ class _AnnouncementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      onTap: () => AppRoutes.toNamed(
-        context,
+      onTap: () => Navigator.of(context).pushNamed(
         AppRoutes.newsDetail,
-        pathParameters: <String, String>{'id': '${item.id}'},
+        arguments: item.id,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

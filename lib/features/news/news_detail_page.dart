@@ -6,13 +6,16 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/net/api_exception.dart';
-import '../news_controller.dart';
+import '../../data/models/news.dart';
+import 'news_controller.dart';
 
 /// 新闻公告详情页。
 ///
 /// 正文为后端存储的 HTML 富文本，使用 flutter_html 渲染。
-/// 为避免与 Web 端 vue_flamecloud 的 v-html 出现错位，这里通过 customStylesBuilder
-/// 以 CSS 字符串约束排版，并强制图片宽度 100%（与 `src/styles/rich-text.css` 思路一致）。
+/// 为避免与 Web 端（vue_flamecloud 的 v-html）出现错位：
+///  - 图片强制 width:100% 自适应容器宽度；
+///  - 通过 `style` 统一排版（字号/行高/颜色/间距），与 `src/styles/rich-text.css` 思路一致；
+///  - 富文本作者端应避免固定像素宽度、flex 等复杂布局，以免两端错位。
 class NewsDetailPage extends ConsumerWidget {
   const NewsDetailPage({required this.id, super.key});
 
@@ -94,9 +97,8 @@ class _NewsDetailContent extends StatelessWidget {
           const SizedBox(height: 8),
           Html(
             data: item.content ?? '',
-            customStylesBuilder: (element) =>
-                _styleFor(element.localName, textColor, isDark),
-            onLinkTap: (String? url, Map<String, String> attributes) {
+            style: _htmlStyle(textColor, isDark),
+            onLinkTap: (String? url, Map<String, String> attributes, _) {
               if (url != null) {
                 unawaited(
                   launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
@@ -109,118 +111,100 @@ class _NewsDetailContent extends StatelessWidget {
     );
   }
 
-  /// 以 CSS 字符串约束每个 HTML 标签的样式，保证与 Web 端一致且响应式。
-  static Map<String, String>? _styleFor(String? tag, Color textColor, bool isDark) {
-    final String cssColor = _toCss(textColor);
-    switch (tag) {
-      case 'img':
-        return <String, String>{
-          'width': '100%',
-          'height': 'auto',
-          'border-radius': '8px',
-        };
-      case 'a':
-        return <String, String>{
-          'color': '#f97316',
-          'text-decoration': 'underline',
-        };
-      case 'h1':
-        return <String, String>{
-          'font-size': '22px',
-          'font-weight': 'bold',
-          'color': cssColor,
-          'margin': '16px 0 8px',
-        };
-      case 'h2':
-        return <String, String>{
-          'font-size': '19px',
-          'font-weight': 'bold',
-          'color': cssColor,
-          'margin': '16px 0 8px',
-        };
-      case 'h3':
-        return <String, String>{
-          'font-size': '17px',
-          'font-weight': 'bold',
-          'color': cssColor,
-          'margin': '14px 0 6px',
-        };
-      case 'p':
-        return <String, String>{
-          'color': cssColor,
-          'margin': '8px 0',
-          'line-height': '1.8',
-        };
-      case 'body':
-        return <String, String>{
-          'color': cssColor,
-          'font-size': '15px',
-          'line-height': '1.8',
-        };
-      case 'blockquote':
-        return <String, String>{
-          'border-left': '4px solid #fb923c',
-          'background': isDark ? 'rgba(254,215,170,0.1)' : '#fff7ed',
-          'color': isDark ? '#fdba74' : '#9a3412',
-          'padding': '8px 12px',
-          'border-radius': '0 8px 8px 0',
-          'margin': '12px 0',
-        };
-      case 'code':
-        return <String, String>{
-          'background': isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6',
-          'color': '#db2777',
-          'padding': '1px 6px',
-          'border-radius': '4px',
-          'font-size': '13px',
-        };
-      case 'pre':
-        return <String, String>{
-          'background': '#1f2937',
-          'color': '#f9fafb',
-          'padding': '12px',
-          'border-radius': '8px',
-          'overflow-x': 'auto',
-          'font-size': '13px',
-        };
-      case 'ul':
-      case 'ol':
-        return <String, String>{'padding-left': '20px', 'margin': '8px 0'};
-      case 'li':
-        return <String, String>{'margin': '4px 0'};
-      case 'table':
-        return <String, String>{
-          'width': '100%',
-          'border-collapse': 'collapse',
-          'margin': '8px 0',
-        };
-      case 'th':
-      case 'td':
-        return <String, String>{
-          'border': '1px solid ${isDark ? '#374151' : '#e5e7eb'}',
-          'padding': '6px 10px',
-          'text-align': 'left',
-        };
-      case 'hr':
-        return <String, String>{
-          'border': 'none',
-          'border-top': '1px solid #374151',
-          'margin': '16px 0',
-        };
-      default:
-        return null;
-    }
-  }
+  /// 与 Web 端 `src/styles/rich-text.css` 一致的富文本排版约束。
+  static Map<String, Style> _htmlStyle(Color textColor, bool isDark) {
+    final Color blockBg = isDark
+        ? const Color(0x1AFFEDD6)
+        : const Color(0xFFFFF7ED);
+    final Color blockText = isDark
+        ? const Color(0xFFFDBA74)
+        : const Color(0xFF9A3412);
+    final Color codeBg = isDark
+        ? const Color(0x1AFFFFFF)
+        : const Color(0xFFF3F4F6);
+    final Color codeText = const Color(0xFFDB2777);
+    final Color preBg = const Color(0xFF1F2937);
+    final Color preText = const Color(0xFFF9FAFB);
+    final Color borderColor = isDark
+        ? const Color(0xFF374151)
+        : const Color(0xFFE5E7EB);
 
-  /// Color -> #RRGGBB。
-  static String _toCss(Color c) {
-    final int r = (c.r * 255).round() & 0xff;
-    final int g = (c.g * 255).round() & 0xff;
-    final int b = (c.b * 255).round() & 0xff;
-    final String hex = r.toRadixString(16).padLeft(2, '0') +
-        g.toRadixString(16).padLeft(2, '0') +
-        b.toRadixString(16).padLeft(2, '0');
-    return '#$hex';
+    return <String, Style>{
+      'body': Style(
+        color: textColor,
+        fontSize: FontSize(15),
+        lineHeight: LineHeight(1.8),
+        margin: Margins.zero,
+      ),
+      'p': Style(color: textColor, margin: Margins.symmetric(vertical: 8)),
+      'h1': Style(
+        fontSize: FontSize(22),
+        fontWeight: FontWeight.bold,
+        color: textColor,
+        margin: Margins.only(top: 16, bottom: 8),
+      ),
+      'h2': Style(
+        fontSize: FontSize(19),
+        fontWeight: FontWeight.bold,
+        color: textColor,
+        margin: Margins.only(top: 16, bottom: 8),
+      ),
+      'h3': Style(
+        fontSize: FontSize(17),
+        fontWeight: FontWeight.bold,
+        color: textColor,
+        margin: Margins.only(top: 14, bottom: 6),
+      ),
+      'a': Style(
+        color: const Color(0xFFF97316),
+        textDecoration: TextDecoration.underline,
+      ),
+      // 图片宽度自适应容器，避免 App 端溢出/与 Web 端错位。
+      'img': Style(width: Width(100, Unit.percent)),
+      'blockquote': Style(
+        backgroundColor: blockBg,
+        color: blockText,
+        border: Border(left: BorderSide(color: const Color(0xFFFB923C), width: 4)),
+        padding: HtmlPaddings.all(12),
+        margin: Margins.symmetric(vertical: 12),
+      ),
+      'code': Style(
+        backgroundColor: codeBg,
+        color: codeText,
+        padding: HtmlPaddings.all(4),
+        fontSize: FontSize(13),
+      ),
+      'pre': Style(
+        backgroundColor: preBg,
+        color: preText,
+        padding: HtmlPaddings.all(12),
+        margin: Margins.symmetric(vertical: 8),
+        fontSize: FontSize(13),
+      ),
+      'ul': Style(
+        padding: HtmlPaddings.only(left: 20),
+        margin: Margins.symmetric(vertical: 8),
+      ),
+      'ol': Style(
+        padding: HtmlPaddings.only(left: 20),
+        margin: Margins.symmetric(vertical: 8),
+      ),
+      'li': Style(margin: Margins.symmetric(vertical: 4), color: textColor),
+      'table': Style(
+        width: Width(100, Unit.percent),
+        margin: Margins.symmetric(vertical: 8),
+      ),
+      'th': Style(
+        border: Border.all(color: borderColor),
+        padding: HtmlPaddings.all(6),
+        color: textColor,
+      ),
+      'td': Style(
+        border: Border.all(color: borderColor),
+        padding: HtmlPaddings.all(6),
+        color: textColor,
+      ),
+    };
   }
 }
 

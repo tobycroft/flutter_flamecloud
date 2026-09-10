@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/router/app_router.dart';
-import '../models/news.dart';
-import '../repositories/news_repository.dart';
+import '../../data/models/news.dart';
+import '../../data/repositories/news_repository.dart';
 
 /// 新闻公告列表页（对应 Vue 端「新闻公告」列表页）。
 class NewsListPage extends ConsumerStatefulWidget {
@@ -62,7 +62,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage> {
               : ListView.separated(
                   padding: const EdgeInsets.all(12),
                   itemCount: _items.length + (_finished ? 0 : 1),
-                  separatorBuilder: (_, __) => Divider(
+                  separatorBuilder: (_, _) => Divider(
                     color: isDark ? Colors.white12 : Colors.black12,
                   ),
                   itemBuilder: (BuildContext context, int index) {
@@ -80,10 +80,9 @@ class _NewsListPageState extends ConsumerState<NewsListPage> {
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => AppRoutes.toNamed(
-                        context,
+                      onTap: () => Navigator.of(context).pushNamed(
                         AppRoutes.newsDetail,
-                        pathParameters: <String, String>{'id': '${item.id}'},
+                        arguments: item.id,
                       ),
                     );
                   },
