@@ -726,21 +726,22 @@ class _ReplyBar extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 12),
-            SizedBox(
-              height: 48,
-              child: FilledButton(
-                onPressed: state.sending ? null : () => unawaited(onSend()),
-                child: state.sending
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('发送'),
+            FilledButton(
+              onPressed: state.sending ? null : () => unawaited(onSend()),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(72, 48),
+                maximumSize: const Size.fromHeight(48),
               ),
+              child: state.sending
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('发送'),
             ),
           ],
         ),
