@@ -35,60 +35,66 @@ class ChatBubble extends StatelessWidget {
           if (!isSelf) const _Avatar(admin: true),
           if (!isSelf) const SizedBox(width: 8),
           Flexible(
-            child: Column(
-              crossAxisAlignment:
-                  isSelf ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  isSelf ? selfName : message.senderName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isSelf
-                        ? const Color(0xFF2563EB)
-                        : AppColors.orange500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelf
-                        ? const Color(0xFF3B82F6)
-                        : (isDark
-                            ? context.surfaces.inset
-                            : const Color(0xFFF3F4F6)),
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isSelf ? 16 : 4),
-                      bottomRight: Radius.circular(isSelf ? 4 : 16),
-                    ),
-                  ),
-                  child: Text(
-                    message.content,
+            // SizedBox(width: double.infinity) 让 Column 占满整行宽度，
+            // 否则 Column 会收缩到内容宽度，crossAxisAlignment 的 end/start
+            // 对齐将失效，导致所有气泡都贴着左侧。
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment:
+                    isSelf ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    isSelf ? selfName : message.senderName,
                     style: TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
+                      fontSize: 12,
                       color: isSelf
-                          ? Colors.white
-                          : (isDark ? Colors.white : const Color(0xFF111827)),
+                          ? const Color(0xFF2563EB)
+                          : AppColors.orange500,
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  formatChatTime(message.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? const Color(0xFF64748B)
-                        : const Color(0xFF9CA3AF),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelf
+                          ? const Color(0xFF3B82F6)
+                          : (isDark
+                              ? context.surfaces.inset
+                              : const Color(0xFFF3F4F6)),
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(16),
+                        topRight: const Radius.circular(16),
+                        bottomLeft: Radius.circular(isSelf ? 16 : 4),
+                        bottomRight: Radius.circular(isSelf ? 4 : 16),
+                      ),
+                    ),
+                    child: Text(
+                      message.content,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        color: isSelf
+                            ? Colors.white
+                            : (isDark ? Colors.white : const Color(0xFF111827)),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    formatChatTime(message.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (isSelf) const SizedBox(width: 8),
