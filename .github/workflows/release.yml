@@ -85,3 +85,116 @@ jobs:
           generate_release_notes: true         
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ============================================================
+      # 4. 新增：同步发布到 Gitee
+      # ============================================================
+      - name: Create Gitee Release
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_OWNER: ${{ secrets.GITEE_OWNER }}
+          GITEE_REPO: ${{ secrets.GITEE_REPO }}
+        run: |
+          set -e
+
+          echo "开始创建 Gitee Release..."
+          echo "Repository: ${GITEE_OWNER}/${GITEE_REPO}"
+          echo "Tag: ${APP_VERSION}"
+
+          CREATE_RESPONSE=$(mktemp)
+
+          HTTP_CODE=$(curl -sS \
+            -o "$CREATE_RESPONSE" \
+            -w "%{http_code}" \
+            -X POST \
+            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases" \
+            -H "Authorization: Bearer ${GITEE_TOKEN}" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "tag_name=${APP_VERSION}" \
+            --data-urlencode "name=Release ${APP_VERSION}" \
+            --data-urlencode "body=Flutter Android Release ${APP_VERSION}" \
+            --data-urlencode "target_commitish=main"
+          )
+
+          echo "Gitee API HTTP Status: ${HTTP_CODE}"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "创建 Gitee Release 失败："
+            cat "$CREATE_RESPONSE"
+            exit 1
+          fi
+
+          cat "$CREATE_RESPONSE"
+
+          GITEE_RELEASE_ID=$(jq -r '.id // empty' "$CREATE_RESPONSE")
+
+          if [ -z "$GITEE_RELEASE_ID" ]; then
+            echo "无法获取 Gitee Release ID"
+            exit 1
+          fi
+
+          echo "Gitee Release ID: ${GITEE_RELEASE_ID}"
+
+          echo "Gitee Release 创建成功"
+
+      # ============================================================
+      # 5. 新增：上传 APK 到 Gitee Release
+      # ============================================================
+      - name: Upload APK to Gitee Release
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_OWNER: ${{ secrets.GITEE_OWNER }}
+          GITEE_REPO: ${{ secrets.GITEE_REPO }}
+        run: |
+          set -e
+
+          echo "开始上传 APK 到 Gitee Release..."
+
+          RELEASE_RESPONSE=$(mktemp)
+
+          # 获取刚刚创建的 Release ID
+          HTTP_CODE=$(curl -sS \
+            -o "$RELEASE_RESPONSE" \
+            -w "%{http_code}" \
+            -X GET \
+            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/tags/${APP_VERSION}" \
+            -H "Authorization: Bearer ${GITEE_TOKEN}")
+
+          echo "Gitee Release 查询 HTTP Status: ${HTTP_CODE}"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "获取 Gitee Release 失败："
+            cat "$RELEASE_RESPONSE"
+            exit 1
+          fi
+
+          GITEE_RELEASE_ID=$(jq -r '.id // empty' "$RELEASE_RESPONSE")
+
+          if [ -z "$GITEE_RELEASE_ID" ]; then
+            echo "无法获取 Gitee Release ID"
+            exit 1
+          fi
+
+          echo "Gitee Release ID: ${GITEE_RELEASE_ID}"
+
+          UPLOAD_RESPONSE=$(mktemp)
+
+          HTTP_CODE=$(curl -sS \
+            -o "$UPLOAD_RESPONSE" \
+            -w "%{http_code}" \
+            -X POST \
+            "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/${GITEE_RELEASE_ID}/attach_files" \
+            -H "Authorization: Bearer ${GITEE_TOKEN}" \
+            -F "file=@build/app/outputs/flutter-apk/app-release.apk"
+          )
+
+          echo "Gitee APK Upload HTTP Status: ${HTTP_CODE}"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "上传 APK 到 Gitee 失败："
+            cat "$UPLOAD_RESPONSE"
+            exit 1
+          fi
+
+          echo "APK 上传到 Gitee 成功"
+          cat "$UPLOAD_RESPONSE"
