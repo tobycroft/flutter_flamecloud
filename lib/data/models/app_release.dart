@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/utils/json_value.dart';
 
-/// GitHub Release 数据。
+/// Gitee Release 数据。
 ///
 /// 数据源为 `releases/latest` 接口，用于与本地版本比对判断是否需要升级。
 @immutable
@@ -15,8 +15,14 @@ class AppRelease {
     this.apkDownloadUrl,
   });
 
-  /// 从 GitHub API 返回的 JSON 构造。
-  factory AppRelease.fromMap(Map<String, dynamic> map) {
+  /// 从 Gitee API 返回的 JSON 构造。
+  ///
+  /// Gitee 的 release 对象不含 `html_url`，[fallbackPageUrl] 用于在其缺失时
+  /// 提供 release 详情页地址（由调用方按标签拼接）。
+  factory AppRelease.fromMap(
+    Map<String, dynamic> map, {
+    String fallbackPageUrl = '',
+  }) {
     final List<dynamic> assets = map['assets'] is List
         ? map['assets'] as List<dynamic>
         : const <dynamic>[];
@@ -38,11 +44,13 @@ class AppRelease {
       }
     }
 
+    final String htmlUrl = (JsonValue.string(map['html_url']) ?? '').trim();
+
     return AppRelease(
       tagName: JsonValue.string(map['tag_name']) ?? '',
       name: JsonValue.string(map['name']) ?? '',
       changelog: JsonValue.string(map['body']) ?? '',
-      pageUrl: JsonValue.string(map['html_url']) ?? '',
+      pageUrl: htmlUrl.isEmpty ? fallbackPageUrl : htmlUrl,
       apkDownloadUrl: apkUrl,
     );
   }
