@@ -9,7 +9,7 @@ typedef UpdateCheckState = AsyncValue<AppRelease?>;
 
 /// 自动更新控制器。
 ///
-/// 进入控制台后调用 [checkForUpdate] 拉取 GitHub 最新 release 并与本地
+/// 进入控制台后调用 [checkForUpdate] 拉取 Gitee 最新 release 并与本地
 /// 版本比较，有新版本时由页面监听状态弹出更新提示。
 class UpdateController extends Notifier<UpdateCheckState> {
   @override

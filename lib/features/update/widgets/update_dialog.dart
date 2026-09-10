@@ -6,7 +6,7 @@ import '../../../data/models/app_release.dart';
 
 /// 更新提示弹窗。
 ///
-/// 展示远端新版本号与更新日志，确认后跳转 APK 下载（无附件时跳 Releases 页面）。
+/// 展示远端新版本号与更新日志，确认后跳转 APK 下载（无附件时跳 Gitee Releases 页面）。
 Future<void> showUpdateDialog(BuildContext context, AppRelease release) {
   return showDialog<void>(
     context: context,
