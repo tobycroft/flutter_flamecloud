@@ -7,6 +7,9 @@ import '../../features/console/console_shell_page.dart';
 import '../../features/log/action_log_page.dart';
 import '../../features/profile/theme_mode_page.dart';
 import '../../features/support/support_chat_page.dart';
+import '../../features/ticket/ticket_detail_page.dart';
+import '../../features/ticket/ticket_list_page.dart';
+import '../../features/ticket/ticket_submit_page.dart';
 
 /// 路由名称。
 class AppRoutes {
@@ -32,6 +35,15 @@ class AppRoutes {
 
   /// 主题模式设置页。
   static const String themeMode = '/theme';
+
+  /// 工单列表页。
+  static const String ticketList = '/ticket/list';
+
+  /// 工单详情页，arguments 传入工单 id。
+  static const String ticketDetail = '/ticket/detail';
+
+  /// 提交工单页。
+  static const String ticketSubmit = '/ticket/submit';
 }
 
 /// 命名路由表。
@@ -77,6 +89,23 @@ class AppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const ThemeModePage(),
+        );
+      case AppRoutes.ticketList:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const TicketListPage(),
+        );
+      case AppRoutes.ticketSubmit:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const TicketSubmitPage(),
+        );
+      case AppRoutes.ticketDetail:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => TicketDetailPage(
+            ticketId: settings.arguments is int ? settings.arguments as int : 0,
+          ),
         );
       default:
         return null;

@@ -48,7 +48,9 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.confirmation_number_outlined,
             title: '工单',
             subtitle: '提交与跟踪',
-            onTap: () => _comingSoon(context, '工单'),
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.ticketList),
+            ),
           ),
           const SizedBox(height: 12),
           _ActionTile(
@@ -105,15 +107,6 @@ class ProfilePage extends ConsumerWidget {
         AppThemeMode.oled => 'OLED',
         AppThemeMode.system => '跟随系统',
       };
-
-  /// 尚未搬迁的页面统一提示。
-  void _comingSoon(BuildContext context, String name) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('$name 正在搬迁中，敬请期待')),
-      );
-  }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final bool? confirmed = await showDialog<bool>(
