@@ -1,9 +1,9 @@
 name: Flutter Auto Release
 
 on:
-  workflow_dispatch:
-    push:
-      branches: [ main ]
+  workflow_dispatch: # 保留手动触发，方便你随时手动打个包
+  push:
+    branches: [ main ] # 已经为你开启！每次 push 到 main 分支都会触发
 
 permissions:
   contents: write
@@ -77,14 +77,13 @@ jobs:
         uses: nICEnnnnnnnLee/action-gitee-release@master
         with:
           gitee_action: create_release
-          gitee_owner: ${{ secrets.GITEE_OWNER }} # 你在 GitHub Secrets 里配置的 Gitee 用户名
-          gitee_repo: ${{ secrets.GITEE_REPO }}   # 你在 GitHub Secrets 里配置的 Gitee 仓库名
-          gitee_token: ${{ secrets.GITEE_TOKEN }} # 你在 GitHub Secrets 里配置的 Gitee Token
-          gitee_tag_name: ${{ env.APP_VERSION }}  # 保持与 GitHub 端一致的 Tag 名字
+          gitee_owner: ${{ secrets.GITEE_OWNER }} 
+          gitee_repo: ${{ secrets.GITEE_REPO }}   
+          gitee_token: ${{ secrets.GITEE_TOKEN }} 
+          gitee_tag_name: ${{ env.APP_VERSION }}  
           gitee_release_name: Release ${{ env.APP_VERSION }}
           gitee_release_body: 自动发布的新版本 ${{ env.APP_VERSION }}
-          gitee_target_commitish: main # 如果你的默认分支不是 main 请修改这里
-          gitee_file_name: app-release.apk # 在 Gitee Release 页面展示的附件文件名
-          gitee_file_path: build/app/outputs/flutter-apk/app-release.apk # 本地打包产物的路径
-          gitee_upload_retry_times: 3 # 遇到网络抖动自动重试 [cite: 2.2.2]
-          
+          gitee_target_commitish: main 
+          gitee_file_name: app-release.apk 
+          gitee_file_path: build/app/outputs/flutter-apk/app-release.apk 
+          gitee_upload_retry_times: 3
