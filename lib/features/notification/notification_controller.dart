@@ -118,6 +118,38 @@ class NotificationController extends Notifier<NotificationState> {
     }
   }
 
+  /// 删除单条通知：先从本地列表移除，再调用接口删除。
+  ///
+  /// 被删除的通知此前若未读，需要同步扣减未读计数；
+  /// 接口失败则回滚本地列表与未读计数，并把异常抛出交由页面提示。
+  Future<void> delete(int id) async {
+    final List<NotificationItem> previous = state.items;
+    final int previousUnread = state.unread;
+    final int index =
+        previous.indexWhere((NotificationItem item) => item.id == id);
+    if (index < 0) {
+      return;
+    }
+    final NotificationItem removed = previous[index];
+    final List<NotificationItem> items = previous
+        .where((NotificationItem item) => item.id != id)
+        .toList(growable: false);
+    int unread = state.unread;
+    if (!removed.read && unread > 0) {
+      unread -= 1;
+    }
+
+    state = state.copyWith(items: items, unread: unread);
+    try {
+      await ref.read(notificationRepositoryProvider).delete(id: id);
+    } on Exception {
+      if (ref.mounted) {
+        state = state.copyWith(items: previous, unread: previousUnread);
+      }
+      rethrow;
+    }
+  }
+
   /// 将指定通知置为已读，并相应扣减未读计数。
   void _applyRead(int id) {
     final List<NotificationItem> items =

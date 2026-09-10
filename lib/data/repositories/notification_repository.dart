@@ -65,6 +65,20 @@ class NotificationRepository {
     }
   }
 
+  /// 删除单条通知，对应 `POST /v1/notification/delete`。
+  ///
+  /// [id] 通知 id，后端按 id + uid 精确删除，只会删自己名下的通知。
+  Future<void> delete({required int id}) async {
+    try {
+      await _dio.post<dynamic>(
+        ApiEndpoints.notification.delete,
+        data: FormData.fromMap(<String, Object?>{'id': id}),
+      );
+    } on DioException catch (error) {
+      throw error.toAppException();
+    }
+  }
+
   /// 解析统一响应包。
   ApiEnvelope _unwrap(Response<dynamic> response) {
     final Object? data = response.data;
