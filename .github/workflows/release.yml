@@ -1,9 +1,9 @@
 name: Flutter Auto Release
 
 on:
-  workflow_dispatch: # 保留手动触发，方便你随时手动打个包
+  workflow_dispatch:
   push:
-    branches: [ main ] # 已经为你开启！每次 push 到 main 分支都会触发
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -72,18 +72,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. 创建 Gitee Release 并同步上传 APK
-      - name: Create Release and Upload APK to Gitee
-        uses: nICEnnnnnnnLee/action-gitee-release@master
-        with:
-          gitee_action: create_release
-          gitee_owner: ${{ secrets.GITEE_OWNER }} 
-          gitee_repo: ${{ secrets.GITEE_REPO }}   
-          gitee_token: ${{ secrets.GITEE_TOKEN }} 
-          gitee_tag_name: ${{ env.APP_VERSION }}  
-          gitee_release_name: Release ${{ env.APP_VERSION }}
-          gitee_release_body: 自动发布的新版本 ${{ env.APP_VERSION }}
-          gitee_target_commitish: main 
-          gitee_file_name: app-release.apk 
-          gitee_file_path: build/app/outputs/flutter-apk/app-release.apk 
-          gitee_upload_retry_times: 3
+      # 4. 调用 Gitee 官方 API 创建 Release 并上传 APK
+      - name: Create Gitee Release and Upload APK via API
+        run: |
+          echo "==== 1. 创建 Gitee Release ===="
+          # 发送 POST 请求创建 Release
+          CREATE_RESP=$(curl -s -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_OWNER }}/${{ secrets.GITEE_REPO }}/releases" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "access_token": "${{ secrets.GITEE_TOKEN }}",
+              "tag_name": "${{ env.APP_VERSION }}",
+              "name": "Release ${{ env.APP_VERSION }}",
+              "body": "自动发布的新版本 ${{ env.APP_VERSION }}",
+              "target_commitish": "main"
+            }')
+          
+          echo "创建 Release 响应: $CREATE_RESP"
+          
+          # 使用 jq 提取生成的 release 的 ID
+          RELEASE_ID=$(echo $CREATE_RESP | jq -r '.id')
+          
+          # 判断是否获取到了合法的 ID（排查 Token 权限等错误）
+          if [ "$RELEASE_ID" == "null" ] || [ -z "$RELEASE_ID" ]; then
+            echo "❌ 创建 Gitee Release 失败，请检查 Token 是否有效、是否有写入权限！"
+            exit 1
+          fi
+          
+          echo "✅ Gitee Release 创建成功，ID: $RELEASE_ID"
+          echo "==== 2. 上传 APK 到 Gitee Release ===="
+          
+          # 发送 POST 请求上传附件
+          UPLOAD_RESP=$(curl -s -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_OWNER }}/${{ secrets.GITEE_REPO }}/releases/$RELEASE_ID/attach_files" \
+            -F "access_token=${{ secrets.GITEE_TOKEN }}" \
+            -F "file=@build/app/outputs/flutter-apk/app-release.apk")
+            
+          echo "上传附件响应: $UPLOAD_RESP"
+          echo "🎉 Gitee 发布流程执行完毕！"
