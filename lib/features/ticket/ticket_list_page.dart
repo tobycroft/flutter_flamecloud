@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/net/api_exception.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/infinite_scroll.dart';
 import '../../data/models/ticket.dart';
 import 'ticket_list_controller.dart';
-import 'ticket_list_page/pager.dart';
 import 'ticket_list_page/stat_card.dart';
 import 'ticket_list_page/status_filter_bar.dart';
 import 'ticket_list_page/status_view.dart';
@@ -41,8 +41,8 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
 
   /// 跳转提交页，提交成功后刷新列表。
   Future<void> _openSubmit() async {
-    final Object? result =
-        await Navigator.of(context).pushNamed(AppRoutes.ticketSubmit);
+    final Object? result = await Navigator.of(context)
+        .pushNamed(AppRoutes.ticketSubmit);
     if (result == true && mounted) {
       unawaited(ref.read(ticketListControllerProvider.notifier).refresh());
     }
@@ -50,8 +50,8 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
 
   /// 跳转详情，返回后刷新列表（可能在详情里回复/关闭/重启）。
   Future<void> _openDetail(int id) async {
-    final Object? result =
-        await Navigator.of(context).pushNamed(AppRoutes.ticketDetail, arguments: id);
+    final Object? result = await Navigator.of(context)
+        .pushNamed(AppRoutes.ticketDetail, arguments: id);
     if (result == true && mounted) {
       unawaited(ref.read(ticketListControllerProvider.notifier).refresh());
     }
@@ -144,61 +144,67 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
     if (state.errorMessage != null && state.items.isEmpty) {
       return TicketListStatusView(
         message: state.errorMessage!,
-        onRetry: () => ref.read(ticketListControllerProvider.notifier).refresh(),
+        onRetry: () =>
+            ref.read(ticketListControllerProvider.notifier).refresh(),
       );
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(ticketListControllerProvider.notifier).refresh(),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: TicketListStatCard(
-                  label: '服务中',
-                  value: state.processing,
-                  color: AppColors.flame500,
+      onRefresh: () =>
+          ref.read(ticketListControllerProvider.notifier).refresh(),
+      child: InfiniteScrollListener(
+        onLoadMore: () =>
+            ref.read(ticketListControllerProvider.notifier).loadMore(),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: TicketListStatCard(
+                    label: '服务中',
+                    value: state.processing,
+                    color: AppColors.flame500,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TicketListStatCard(
-                  label: '待您确认结果',
-                  value: state.confirm,
-                  color: const Color(0xFFEA580C),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TicketListStatCard(
+                    label: '待您确认结果',
+                    value: state.confirm,
+                    color: const Color(0xFFEA580C),
+                  ),
                 ),
-              ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TicketListStatusFilterBar(state: state),
+            const SizedBox(height: 12),
+            if (state.items.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    '暂无工单',
+                    style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                  ),
+                ),
+              )
+            else ...<Widget>[
+              for (final TicketItem item in state.items)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: TicketListCard(
+                    ticket: item,
+                    onTap: () => unawaited(_openDetail(item.id)),
+                    onClose: () => unawaited(_closeTicket(item)),
+                    onReopen: () => unawaited(_reopen(item)),
+                  ),
+                ),
+              LoadMoreFooter(loading: state.loading, hasMore: state.hasMore),
             ],
-          ),
-          const SizedBox(height: 16),
-          TicketListStatusFilterBar(state: state),
-          const SizedBox(height: 12),
-          if (state.items.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(
-                child: Text(
-                  '暂无工单',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
-                ),
-              ),
-            )
-          else ...<Widget>[
-            for (final TicketItem item in state.items)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TicketListCard(
-                  ticket: item,
-                  onTap: () => unawaited(_openDetail(item.id)),
-                  onClose: () => unawaited(_closeTicket(item)),
-                  onReopen: () => unawaited(_reopen(item)),
-                ),
-              ),
-            TicketListPager(state: state),
           ],
-        ],
+        ),
       ),
     );
   }

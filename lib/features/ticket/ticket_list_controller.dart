@@ -52,6 +52,9 @@ class TicketListState {
   int get totalPages =>
       total <= 0 ? 1 : ((total + pageSize - 1) / pageSize).floor();
 
+  /// 是否还有更多数据（已加载条数 < 总条数）。
+  bool get hasMore => items.length < total;
+
   /// 复制出新状态。
   ///
   /// [statusFilter] 使用哨兵值区分「未传」与「显式置 null（切回全部）」。
@@ -108,9 +111,9 @@ class TicketListController extends Notifier<TicketListState> {
     _loaded = true;
   }
 
-  /// 重新拉取当前筛选、当前页。
+  /// 重新拉取第一页（下拉刷新/重试时重置列表）。
   Future<void> refresh() async {
-    await _fetch(page: state.page);
+    await _fetch(page: 1);
   }
 
   /// 切换状态筛选并回到第一页。
@@ -122,12 +125,12 @@ class TicketListController extends Notifier<TicketListState> {
     await _fetch(page: 1);
   }
 
-  /// 翻到指定页。
-  Future<void> goPage(int page) async {
-    if (page < 1) {
+  /// 上拉加载下一页（追加到已有列表），无更多或加载中时跳过。
+  Future<void> loadMore() async {
+    if (state.loading || !state.hasMore) {
       return;
     }
-    await _fetch(page: page);
+    await _fetch(page: state.page + 1, append: true);
   }
 
   /// 关闭工单（状态置 3），成功后刷新列表。
@@ -144,22 +147,25 @@ class TicketListController extends Notifier<TicketListState> {
     await refresh();
   }
 
-  /// 拉取指定页数据。
-  Future<void> _fetch({required int page}) async {
+  /// 拉取指定页数据；[append] 为 true 时追加到已有列表（上拉加载）。
+  Future<void> _fetch({required int page, bool append = false}) async {
     state = state.copyWith(loading: true, page: page, clearError: true);
     try {
-      final TicketListResult result =
-          await ref.read(ticketRepositoryProvider).fetchList(
-                page: page,
-                pageSize: state.pageSize,
-                status: state.statusFilter,
-              );
+      final TicketListResult result = await ref
+          .read(ticketRepositoryProvider)
+          .fetchList(
+            page: page,
+            pageSize: state.pageSize,
+            status: state.statusFilter,
+          );
       if (!ref.mounted) {
         return;
       }
       _loaded = true;
       state = state.copyWith(
-        items: result.items,
+        items: append
+            ? <TicketItem>[...state.items, ...result.items]
+            : result.items,
         total: result.total,
         processing: result.processing,
         confirm: result.confirm,
@@ -189,7 +195,7 @@ class TicketListController extends Notifier<TicketListState> {
 
 /// 工单列表状态实例。
 final NotifierProvider<TicketListController, TicketListState>
-    ticketListControllerProvider =
+ticketListControllerProvider =
     NotifierProvider<TicketListController, TicketListState>(
-  TicketListController.new,
-);
+      TicketListController.new,
+    );
