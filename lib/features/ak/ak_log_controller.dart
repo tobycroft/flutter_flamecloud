@@ -89,34 +89,31 @@ class AkLogController extends Notifier<AkLogState> {
     await _fetch(1);
   }
 
-  /// 重新拉取当前页。
+  /// 重新拉取第一页（下拉刷新/重试时重置列表）。
   Future<void> refresh() async {
-    await _fetch(state.page);
+    await _fetch(1);
   }
 
-  /// 翻到指定页。
-  Future<void> goPage(int page) async {
-    if (page < 1) {
+  /// 上拉加载下一页（追加到已有列表），无更多或加载中时跳过。
+  Future<void> loadMore() async {
+    if (state.loading || !state.hasMore) {
       return;
     }
-    await _fetch(page);
+    await _fetch(state.page + 1, append: true);
   }
 
-  /// 拉取指定页数据。
-  Future<void> _fetch(int page) async {
+  /// 拉取指定页数据；[append] 为 true 时追加到已有列表（上拉加载）。
+  Future<void> _fetch(int page, {bool append = false}) async {
     state = state.copyWith(loading: true, page: page, clearError: true);
     try {
-      final List<AccessKeyLogItem> items =
-          await ref.read(accessKeyRepositoryProvider).fetchLogs(
-                akId: state.akId,
-                page: page,
-                pageSize: state.pageSize,
-              );
+      final List<AccessKeyLogItem> items = await ref
+          .read(accessKeyRepositoryProvider)
+          .fetchLogs(akId: state.akId, page: page, pageSize: state.pageSize);
       if (!ref.mounted) {
         return;
       }
       state = state.copyWith(
-        items: items,
+        items: append ? <AccessKeyLogItem>[...state.items, ...items] : items,
         hasMore: items.length >= state.pageSize,
         loading: false,
       );
@@ -144,6 +141,4 @@ class AkLogController extends Notifier<AkLogState> {
 
 /// AK 调用日志状态实例。
 final NotifierProvider<AkLogController, AkLogState> akLogControllerProvider =
-    NotifierProvider<AkLogController, AkLogState>(
-  AkLogController.new,
-);
+    NotifierProvider<AkLogController, AkLogState>(AkLogController.new);

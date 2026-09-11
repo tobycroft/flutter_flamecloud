@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/infinite_scroll.dart';
 import '../../../data/models/access_key.dart';
 import '../ak_log_controller.dart';
 
@@ -38,18 +39,24 @@ class AkLogListView extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(akLogControllerProvider.notifier).refresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 16),
-        itemCount: state.items.length + 1,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == state.items.length) {
-            return _AkLogPager(state: state);
-          }
-          return _AkLogTile(
-            item: state.items[index],
-            showAkId: state.akId == null,
-          );
-        },
+      child: InfiniteScrollListener(
+        onLoadMore: () => ref.read(akLogControllerProvider.notifier).loadMore(),
+        child: ListView.builder(
+          padding: const EdgeInsets.only(bottom: 16),
+          itemCount: state.items.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == state.items.length) {
+              return LoadMoreFooter(
+                loading: state.loading,
+                hasMore: state.hasMore,
+              );
+            }
+            return _AkLogTile(
+              item: state.items[index],
+              showAkId: state.akId == null,
+            );
+          },
+        ),
       ),
     );
   }
@@ -140,8 +147,9 @@ class _AkLogTile extends StatelessWidget {
                 item.displayTime,
                 style: TextStyle(
                   fontSize: 12,
-                  color:
-                      isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -154,8 +162,9 @@ class _AkLogTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.5,
-                  color:
-                      isDark ? const Color(0xFFCBD5E1) : const Color(0xFF374151),
+                  color: isDark
+                      ? const Color(0xFFCBD5E1)
+                      : const Color(0xFF374151),
                 ),
               ),
             ),
@@ -166,8 +175,9 @@ class _AkLogTile extends StatelessWidget {
                 'IP ${item.ip}',
                 style: TextStyle(
                   fontSize: 12,
-                  color:
-                      isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF9CA3AF),
                 ),
               ),
             ),
@@ -190,59 +200,5 @@ class _AkLogTile extends StatelessWidget {
       default:
         return const Color(0xFF6B7280);
     }
-  }
-}
-
-/// 底部分页条。
-class _AkLogPager extends ConsumerWidget {
-  const _AkLogPager({required this.state});
-
-  final AkLogState state;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          OutlinedButton(
-            onPressed: state.loading || state.page <= 1
-                ? null
-                : () => unawaited(
-                      ref
-                          .read(akLogControllerProvider.notifier)
-                          .goPage(state.page - 1),
-                    ),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            child: const Text('上一页'),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              state.loading ? '加载中...' : '第 ${state.page} 页',
-              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-            ),
-          ),
-          OutlinedButton(
-            onPressed: state.loading || !state.hasMore
-                ? null
-                : () => unawaited(
-                      ref
-                          .read(akLogControllerProvider.notifier)
-                          .goPage(state.page + 1),
-                    ),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            child: const Text('下一页'),
-          ),
-        ],
-      ),
-    );
   }
 }
