@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/widgets/infinite_scroll.dart';
+
 import 'action_log_controller.dart';
 import 'action_log_page/action_log_tile.dart';
 import 'action_log_page/error_view.dart';
-import 'action_log_page/pager.dart';
 import 'action_log_page/type_filter_bar.dart';
 
 /// 操作日志页，搬迁自 vue_flamecloud/ActionLogsPage。
@@ -84,18 +85,25 @@ class _ActionLogPageState extends ConsumerState<ActionLogPage> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(actionLogControllerProvider.notifier).refresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 16),
-        itemCount: state.items.length + 1,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == state.items.length) {
-            return ActionLogPager(state: state);
-          }
-          return ActionLogTile(
-            item: state.items[index],
-            types: state.types,
-          );
-        },
+      child: InfiniteScrollListener(
+        onLoadMore: () =>
+            ref.read(actionLogControllerProvider.notifier).loadMore(),
+        child: ListView.builder(
+          padding: const EdgeInsets.only(bottom: 16),
+          itemCount: state.items.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == state.items.length) {
+              return LoadMoreFooter(
+                loading: state.loading,
+                hasMore: state.hasMore,
+              );
+            }
+            return ActionLogTile(
+              item: state.items[index],
+              types: state.types,
+            );
+          },
+        ),
       ),
     );
   }

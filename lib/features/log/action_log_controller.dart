@@ -51,6 +51,9 @@ class ActionLogState {
   int get totalPages =>
       total <= 0 ? 1 : ((total + pageSize - 1) / pageSize).floor();
 
+  /// 是否还有更多数据（已加载条数 < 总条数）。
+  bool get hasMore => items.length < total;
+
   /// 复制出新状态。
   ///
   /// [selectedTypeId] 使用哨兵值区分「未传」与「显式置 null（切回综合）」。
@@ -109,9 +112,9 @@ class ActionLogController extends Notifier<ActionLogState> {
     await _fetchLogs(page: 1);
   }
 
-  /// 重新拉取当前筛选、当前页的日志。
+  /// 重新拉取第一页日志（下拉刷新/重试时重置列表）。
   Future<void> refresh() async {
-    await _fetchLogs(page: state.page);
+    await _fetchLogs(page: 1);
   }
 
   /// 切换日志类型筛选（null 表示综合），并回到第一页。
@@ -123,12 +126,12 @@ class ActionLogController extends Notifier<ActionLogState> {
     await _fetchLogs(page: 1);
   }
 
-  /// 翻到指定页。
-  Future<void> goPage(int page) async {
-    if (page < 1 || page > state.totalPages) {
+  /// 上拉加载下一页（追加到已有列表），无更多或加载中时跳过。
+  Future<void> loadMore() async {
+    if (state.loading || !state.hasMore) {
       return;
     }
-    await _fetchLogs(page: page);
+    await _fetchLogs(page: state.page + 1, append: true);
   }
 
   /// 拉取类型字典。
@@ -150,8 +153,11 @@ class ActionLogController extends Notifier<ActionLogState> {
     }
   }
 
-  /// 拉取指定页日志。
-  Future<void> _fetchLogs({required int page}) async {
+  /// 拉取指定页日志；[append] 为 true 时追加到已有列表（上拉加载）。
+  Future<void> _fetchLogs({
+    required int page,
+    bool append = false,
+  }) async {
     state = state.copyWith(loading: true, page: page, clearError: true);
     try {
       final ActionLogPage result =
@@ -164,7 +170,9 @@ class ActionLogController extends Notifier<ActionLogState> {
         return;
       }
       state = state.copyWith(
-        items: result.items,
+        items: append
+            ? <ActionLogItem>[...state.items, ...result.items]
+            : result.items,
         total: result.total,
         loading: false,
       );
