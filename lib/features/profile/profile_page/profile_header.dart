@@ -6,85 +6,95 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/user_info.dart';
 
 /// 账户信息头部：头像、昵称、UID/手机号与账户余额。
+///
+/// [onTap] 非空时整块卡片可点击（当前用于进入资金管理页），
+/// 余额右侧会多出一个箭头提示可以点进去。
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({this.user, super.key});
+  const ProfileHeader({this.user, this.onTap, super.key});
 
   final UserInfo? user;
+
+  /// 点击整块卡片的回调，为空时不可点击。
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color subColor = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF6B7280);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.surfaces.panel,
+    return Material(
+      color: context.surfaces.panel,
+      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      ),
-      child: Row(
-        children: <Widget>[
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.flame500,
-            child: Text(
-              _initial(user),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  user?.displayName ?? '未获取到用户信息',
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColors.flame500,
+                child: Text(
+                  _initial(user),
                   style: const TextStyle(
-                    fontSize: 16,
+                    color: Colors.white,
+                    fontSize: 22,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _subtitle(user),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF6B7280),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                _balanceText(user),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.flame500,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      user?.displayName ?? '未获取到用户信息',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _subtitle(user),
+                      style: TextStyle(fontSize: 12, color: subColor),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                '账户余额',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF6B7280),
-                ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    _balanceText(user),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.flame500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        '账户余额',
+                        style: TextStyle(fontSize: 11, color: subColor),
+                      ),
+                      if (onTap != null)
+                        Icon(Icons.chevron_right, size: 14, color: subColor),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

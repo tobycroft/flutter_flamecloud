@@ -4,6 +4,7 @@ import '../../features/ak/ak_log_page.dart';
 import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
+import '../../features/fund/fund_manage_page.dart';
 import '../../features/log/action_log_page.dart';
 import '../../features/news/news_detail_page.dart';
 import '../../features/news/news_list_page.dart';
@@ -34,6 +35,9 @@ class AppRoutes {
 
   /// 操作日志页。
   static const String actionLog = '/logs/action';
+
+  /// 资金管理页（余额概览 + 充值订单 + 余额流水）。
+  static const String fundManage = '/fund/manage';
 
   /// 主题模式设置页。
   static const String themeMode = '/theme';
@@ -92,6 +96,11 @@ class AppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const ActionLogPage(),
+        );
+      case AppRoutes.fundManage:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const FundManagePage(),
         );
       case AppRoutes.themeMode:
         return MaterialPageRoute<void>(

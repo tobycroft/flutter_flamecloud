@@ -21,20 +21,26 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final UserInfo? user =
-        ref.watch(sessionControllerProvider).asData?.value?.user;
+    final UserInfo? user = ref
+        .watch(sessionControllerProvider)
+        .asData
+        ?.value
+        ?.user;
     final AppThemeMode themeMode = ref.watch(themeModeControllerProvider);
     final bool autoUpdate = ref.watch(autoUpdateSettingProvider);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的'),
-      ),
+      appBar: AppBar(title: const Text('我的')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          ProfileHeader(user: user),
+          ProfileHeader(
+            user: user,
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.fundManage),
+            ),
+          ),
           const SizedBox(height: 16),
           ProfileSwitchTile(
             icon: Icons.system_update_outlined,
@@ -43,6 +49,15 @@ class ProfilePage extends ConsumerWidget {
             value: autoUpdate,
             onChanged: (bool value) =>
                 ref.read(autoUpdateSettingProvider.notifier).setEnabled(value),
+          ),
+          const SizedBox(height: 12),
+          ProfileActionTile(
+            icon: Icons.account_balance_wallet_outlined,
+            title: '资金管理',
+            subtitle: '余额、充值订单与流水',
+            onTap: () => unawaited(
+              Navigator.of(context).pushNamed(AppRoutes.fundManage),
+            ),
           ),
           const SizedBox(height: 12),
           ProfileActionTile(
@@ -58,27 +73,24 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.key_outlined,
             title: 'AK 管理',
             subtitle: '访问密钥的创建与停用',
-            onTap: () => unawaited(
-              Navigator.of(context).pushNamed(AppRoutes.akManage),
-            ),
+            onTap: () =>
+                unawaited(Navigator.of(context).pushNamed(AppRoutes.akManage)),
           ),
           const SizedBox(height: 12),
           ProfileActionTile(
             icon: Icons.history_outlined,
             title: '操作日志',
             subtitle: '账号下的操作审计记录',
-            onTap: () => unawaited(
-              Navigator.of(context).pushNamed(AppRoutes.actionLog),
-            ),
+            onTap: () =>
+                unawaited(Navigator.of(context).pushNamed(AppRoutes.actionLog)),
           ),
           const SizedBox(height: 12),
           ProfileActionTile(
             icon: Icons.brightness_6_outlined,
             title: '主题模式',
             subtitle: _themeName(themeMode),
-            onTap: () => unawaited(
-              Navigator.of(context).pushNamed(AppRoutes.themeMode),
-            ),
+            onTap: () =>
+                unawaited(Navigator.of(context).pushNamed(AppRoutes.themeMode)),
           ),
           const SizedBox(height: 12),
           ProfileActionTile(
@@ -103,11 +115,11 @@ class ProfilePage extends ConsumerWidget {
   }
 
   String _themeName(AppThemeMode mode) => switch (mode) {
-        AppThemeMode.light => '浅色',
-        AppThemeMode.dark => '深色',
-        AppThemeMode.oled => 'OLED',
-        AppThemeMode.system => '跟随系统',
-      };
+    AppThemeMode.light => '浅色',
+    AppThemeMode.dark => '深色',
+    AppThemeMode.oled => 'OLED',
+    AppThemeMode.system => '跟随系统',
+  };
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final bool? confirmed = await showDialog<bool>(
