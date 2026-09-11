@@ -60,15 +60,6 @@ IconData homeStatusIcon(String type) {
   }
 }
 
-/// 统一的「功能搬迁中」提示。
-void showHomeComingSoon(BuildContext context, String name) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(content: Text('$name 正在搬迁中，敬请期待')),
-    );
-}
-
 /// 二级文字色（用于次要说明文字）。
 Color homeSecondaryColor(bool isDark) =>
     isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);

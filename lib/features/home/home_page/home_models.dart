@@ -1,42 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// 资源概览统计项。
-class HomeResourceStat {
-  const HomeResourceStat({
-    required this.title,
-    required this.value,
-    required this.unit,
-    required this.icon,
-  });
-
-  final String title;
-  final String value;
-  final String unit;
-  final IconData icon;
-}
-
-/// 推荐云服务项。
-class HomeServiceEntry {
-  const HomeServiceEntry({
-    required this.name,
-    required this.icon,
-  });
-
-  final String name;
-  final IconData icon;
-}
-
-/// 最近访问项。
-class HomeRecentVisit {
-  const HomeRecentVisit({
-    required this.name,
-    required this.icon,
-  });
-
-  final String name;
-  final IconData icon;
-}
-
 /// 最近活动项。
 class HomeActivity {
   const HomeActivity({
@@ -70,7 +33,7 @@ class HomeTodoItem {
   final int count;
   final IconData icon;
 
-  /// 点击跳转的路由，为 null 时提示「搬迁中」。
+  /// 点击跳转的路由；当前所有待办均有真实页面。
   final String? route;
 
   /// 为真时数量取自后端聚合计数（未关闭且未删除的工单数），不写死。

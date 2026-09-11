@@ -64,8 +64,6 @@ class _HomeTodoTile extends ConsumerWidget {
       onTap: () {
         if (hasRoute) {
           unawaited(Navigator.of(context).pushNamed(item.route!));
-        } else {
-          showHomeComingSoon(context, item.title);
         }
       },
       child: Padding(

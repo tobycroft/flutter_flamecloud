@@ -28,7 +28,6 @@ class ProfilePage extends ConsumerWidget {
         ?.user;
     final AppThemeMode themeMode = ref.watch(themeModeControllerProvider);
     final bool autoUpdate = ref.watch(autoUpdateSettingProvider);
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('我的')),
@@ -101,14 +100,6 @@ class ProfilePage extends ConsumerWidget {
             onTap: () => _confirmLogout(context, ref),
           ),
           const SizedBox(height: 24),
-          Text(
-            '火焰云 · 控制台业务搬迁中',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
-            ),
-          ),
         ],
       ),
     );
