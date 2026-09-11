@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/net/api_exception.dart';
 import '../../data/models/ticket.dart';
+import '../../data/models/ticket_attachment_draft.dart';
 import '../../data/repositories/ticket_repository.dart';
 import 'ticket_summary_controller.dart';
 
@@ -112,16 +113,21 @@ class TicketDetailController extends Notifier<TicketDetailState> {
   }
 
   /// 追加回复，成功后重拉详情。
-  Future<void> sendReply(String content) async {
+  Future<void> sendReply(
+    String content, {
+    List<TicketAttachmentDraft>? attachments,
+  }) async {
     final int id = state.info?.id ?? 0;
     if (id == 0) {
       return;
     }
     state = state.copyWith(sending: true, clearError: true);
     try {
-      await ref
-          .read(ticketRepositoryProvider)
-          .reply(id: id, content: content.trim());
+      await ref.read(ticketRepositoryProvider).reply(
+            id: id,
+            content: content.trim(),
+            attachments: attachments,
+          );
       if (!ref.mounted) {
         return;
       }

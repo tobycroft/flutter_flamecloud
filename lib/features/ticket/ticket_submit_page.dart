@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/router/app_router.dart';
+import '../../data/models/ticket_attachment_draft.dart';
 import '../../data/models/user_info.dart';
 import '../auth/session_controller.dart';
+import 'ticket_image_picker.dart';
 import 'ticket_meta.dart';
 import 'ticket_submit_controller.dart';
 
@@ -25,6 +27,9 @@ class _TicketSubmitPageState extends ConsumerState<TicketSubmitPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _otherCategoryController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final GlobalKey<TicketImagePickerState> _imagePickerKey =
+      GlobalKey<TicketImagePickerState>();
+  List<TicketAttachmentDraft> _attachments = <TicketAttachmentDraft>[];
   String _urgency = 'fault';
   String _category = 'ecs';
   bool _phonePrefilled = false;
@@ -74,6 +79,7 @@ class _TicketSubmitPageState extends ConsumerState<TicketSubmitPage> {
           otherCategory:
               _category == 'other' ? _otherCategoryController.text.trim() : null,
           contactPhone: _phoneController.text.trim(),
+          attachments: _attachments.isNotEmpty ? _attachments : null,
         );
     if (!mounted || id == 0) {
       return;
@@ -106,6 +112,23 @@ class _TicketSubmitPageState extends ConsumerState<TicketSubmitPage> {
               hintText: '请详细描述您遇到的问题',
               alignLabelWithHint: true,
             ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '上传图片',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TicketImagePicker(
+            key: _imagePickerKey,
+            enabled: !state.submitting,
+            onChanged: (List<TicketAttachmentDraft> list) {
+              _attachments = list;
+            },
           ),
           const SizedBox(height: 16),
           Text(

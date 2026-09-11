@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +10,7 @@ import '../../core/net/dio_client.dart';
 import '../../core/net/http_providers.dart';
 import '../../core/utils/json_value.dart';
 import '../models/ticket.dart';
+import '../models/ticket_attachment_draft.dart';
 
 /// 工单接口仓库。
 ///
@@ -127,14 +130,16 @@ class TicketRepository {
 
   /// 提交标准工单，对应 `POST /v1/ticket/submit`。
   ///
-  /// 移动端暂不支持附件 / 链接 / 联系方式（需先完成文件上传三段式），
-  /// 其余字段与 Vue 端一致。返回新工单 id。
+  /// [attachments] 为已通过三段式上传得到的附件草稿（name/url/hash），
+  /// 以 JSON 数组随 `attachments` 字段提交，与 Vue 端一致；为空则省略。
+  /// 返回新工单 id。
   Future<int> submit({
     required String description,
     required String urgency,
     required String category,
     String? otherCategory,
     String? contactPhone,
+    List<TicketAttachmentDraft>? attachments,
   }) async {
     try {
       final Response<dynamic> response = await _dio.post<dynamic>(
@@ -145,6 +150,10 @@ class TicketRepository {
           'category': category,
           'other_category': ?otherCategory,
           'contact_phone': ?contactPhone,
+          if (attachments != null && attachments.isNotEmpty)
+            'attachments': jsonEncode(
+              attachments.map((TicketAttachmentDraft a) => a.toJson()).toList(),
+            ),
         }),
       );
       return JsonValue.integer(_unwrap(response).asMap?['id']) ?? 0;
@@ -155,12 +164,24 @@ class TicketRepository {
 
   /// 追加回复，对应 `POST /v1/ticket/reply`。
   ///
+  /// [attachments] 同上，为已上传的图片草稿；为空则省略。
   /// 注意后端会把工单状态置为 1（客户发送），即使工单已关闭也会被改回。
-  Future<void> reply({required int id, required String content}) async {
+  Future<void> reply({
+    required int id,
+    required String content,
+    List<TicketAttachmentDraft>? attachments,
+  }) async {
     try {
       await _dio.post<dynamic>(
         ApiEndpoints.ticket.reply,
-        data: FormData.fromMap(<String, Object?>{'id': id, 'content': content}),
+        data: FormData.fromMap(<String, Object?>{
+          'id': id,
+          'content': content,
+          if (attachments != null && attachments.isNotEmpty)
+            'attachments': jsonEncode(
+              attachments.map((TicketAttachmentDraft a) => a.toJson()).toList(),
+            ),
+        }),
       );
     } on DioException catch (error) {
       throw error.toAppException();

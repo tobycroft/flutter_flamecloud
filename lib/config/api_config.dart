@@ -116,6 +116,11 @@ class _UserEndpoints {
   /// 头像。
   final String avatar = '/v1/user/avatar';
 
+  /// 附件 / 头像上传 token，返回预签名 `upload_url`。
+  ///
+  /// 与 vue_flamecloud 的 `API_ENDPOINTS.user.avatar + '/token'` 一致。
+  final String avatarUploadToken = '/v1/user/avatar/token';
+
   /// 文件上传。
   final String fileUpload = '/v1/user/file/upload';
 

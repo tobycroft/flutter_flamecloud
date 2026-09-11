@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/net/api_exception.dart';
+import '../../data/models/ticket_attachment_draft.dart';
 import '../../data/repositories/ticket_repository.dart';
 
 /// 提交工单状态。
@@ -52,6 +53,7 @@ class TicketSubmitController extends Notifier<TicketSubmitState> {
     required String category,
     String? otherCategory,
     String? contactPhone,
+    List<TicketAttachmentDraft>? attachments,
   }) async {
     return _run(() => ref.read(ticketRepositoryProvider).submit(
           description: description.trim(),
@@ -59,6 +61,7 @@ class TicketSubmitController extends Notifier<TicketSubmitState> {
           category: category,
           otherCategory: otherCategory,
           contactPhone: contactPhone,
+          attachments: attachments,
         ));
   }
 

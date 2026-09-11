@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/net/api_exception.dart';
+import '../../core/theme/app_surfaces.dart';
 import '../../data/models/ticket.dart';
+import '../../data/models/ticket_attachment_draft.dart';
 import 'ticket_detail_controller.dart';
 import 'ticket_detail_page/info_card.dart';
 import 'ticket_detail_page/reply_bar.dart';
 import 'ticket_detail_page/reply_card.dart';
 import 'ticket_detail_page/reply_sheet.dart';
 import 'ticket_detail_page/status_view.dart';
+import 'ticket_image_picker.dart';
 
 /// 工单详情页，搬迁自 vue_flamecloud/TicketDetailPage。
 ///
@@ -31,6 +34,8 @@ class TicketDetailPage extends ConsumerStatefulWidget {
 
 class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
   final TextEditingController _replyController = TextEditingController();
+  final GlobalKey<TicketImagePickerState> _replyImagePickerKey =
+      GlobalKey<TicketImagePickerState>();
 
   @override
   void initState() {
@@ -57,14 +62,18 @@ class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
     if (content.isEmpty) {
       return;
     }
+    final List<TicketAttachmentDraft> attachments =
+        _replyImagePickerKey.currentState?.attachments ??
+            const <TicketAttachmentDraft>[];
     try {
       await ref
           .read(ticketDetailControllerProvider.notifier)
-          .sendReply(content);
+          .sendReply(content, attachments: attachments);
       if (!mounted) {
         return;
       }
       _replyController.clear();
+      _replyImagePickerKey.currentState?.clear();
     } on Exception catch (error) {
       _showError(error, '回复发送失败');
     }
@@ -163,12 +172,24 @@ class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
       body: Column(
         children: <Widget>[
           Expanded(child: _buildBody(state)),
-          if (info != null)
+          if (info != null) ...<Widget>[
+            if (!info.closed)
+              Container(
+                width: double.infinity,
+                color: context.surfaces.panel,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: TicketImagePicker(
+                  key: _replyImagePickerKey,
+                  enabled: !state.sending,
+                  onChanged: (_) {},
+                ),
+              ),
             TicketDetailReplyBar(
               state: state,
               controller: _replyController,
               onSend: _sendReply,
             ),
+          ],
         ],
       ),
     );
