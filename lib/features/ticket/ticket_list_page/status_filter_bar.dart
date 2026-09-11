@@ -15,29 +15,34 @@ class TicketListStatusFilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final List<Widget> chips = <Widget>[
+      TicketListFilterChip(
+        label: '全部',
+        selected: state.statusFilter == null,
+        onTap: () => unawaited(
+          ref.read(ticketListControllerProvider.notifier).selectStatus(null),
+        ),
+      ),
+      for (final int status in const <int>[0, 1, 2, 3])
+        TicketListFilterChip(
+          label: TicketMeta.statusText(status),
+          selected: state.statusFilter == status,
+          onTap: () => unawaited(
+            ref
+                .read(ticketListControllerProvider.notifier)
+                .selectStatus(status),
+          ),
+        ),
+    ];
+
     return SizedBox(
       height: 40,
-      child: ListView(
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          TicketListFilterChip(
-            label: '全部',
-            selected: state.statusFilter == null,
-            onTap: () => unawaited(
-              ref.read(ticketListControllerProvider.notifier).selectStatus(null),
-            ),
-          ),
-          for (final int status in const <int>[0, 1, 2, 3])
-            TicketListFilterChip(
-              label: TicketMeta.statusText(status),
-              selected: state.statusFilter == status,
-              onTap: () => unawaited(
-                ref
-                    .read(ticketListControllerProvider.notifier)
-                    .selectStatus(status),
-              ),
-            ),
-        ],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: chips,
+        ),
       ),
     );
   }
