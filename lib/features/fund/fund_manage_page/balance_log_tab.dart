@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/widgets/infinite_scroll.dart';
+import '../../../core/widgets/infinite_scroll.dart';
 import '../balance_log_controller.dart';
 import 'balance_log_tile.dart';
 import 'fund_error_view.dart';
