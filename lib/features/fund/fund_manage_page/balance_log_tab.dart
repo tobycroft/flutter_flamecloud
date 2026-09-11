@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/widgets/infinite_scroll.dart';
 import '../balance_log_controller.dart';
 import 'balance_log_tile.dart';
 import 'fund_error_view.dart';
-import 'fund_pager.dart';
 import 'fund_search_field.dart';
 
 /// 余额流水 tab：描述搜索 + 下拉刷新 + 真分页列表。
@@ -78,33 +78,25 @@ class _BalanceLogTabState extends ConsumerState<BalanceLogTab> {
                 ),
               ],
             )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              itemCount: state.items.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == state.items.length) {
-                  return FundPager(
-                    page: state.page,
-                    totalPages: state.totalPages,
-                    total: state.total,
-                    loading: state.loading,
-                    onPrev: () => unawaited(
-                      ref
-                          .read(balanceLogControllerProvider.notifier)
-                          .goPage(state.page - 1),
-                    ),
-                    onNext: () => unawaited(
-                      ref
-                          .read(balanceLogControllerProvider.notifier)
-                          .goPage(state.page + 1),
-                    ),
+          : InfiniteScrollListener(
+              onLoadMore: () =>
+                  ref.read(balanceLogControllerProvider.notifier).loadMore(),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                itemCount: state.items.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == state.items.length) {
+                    return LoadMoreFooter(
+                      loading: state.loading,
+                      hasMore: state.hasMore,
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: BalanceLogTile(item: state.items[index]),
                   );
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: BalanceLogTile(item: state.items[index]),
-                );
-              },
+                },
+              ),
             ),
     );
   }

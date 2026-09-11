@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/widgets/infinite_scroll.dart';
 import '../recharge_order_controller.dart';
 import 'fund_error_view.dart';
-import 'fund_pager.dart';
 import 'fund_search_field.dart';
 import 'recharge_order_tile.dart';
 
@@ -78,33 +78,25 @@ class _RechargeOrderTabState extends ConsumerState<RechargeOrderTab> {
                 ),
               ],
             )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              itemCount: state.items.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == state.items.length) {
-                  return FundPager(
-                    page: state.page,
-                    totalPages: state.totalPages,
-                    total: state.total,
-                    loading: state.loading,
-                    onPrev: () => unawaited(
-                      ref
-                          .read(rechargeOrderControllerProvider.notifier)
-                          .goPage(state.page - 1),
-                    ),
-                    onNext: () => unawaited(
-                      ref
-                          .read(rechargeOrderControllerProvider.notifier)
-                          .goPage(state.page + 1),
-                    ),
+          : InfiniteScrollListener(
+              onLoadMore: () =>
+                  ref.read(rechargeOrderControllerProvider.notifier).loadMore(),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                itemCount: state.items.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == state.items.length) {
+                    return LoadMoreFooter(
+                      loading: state.loading,
+                      hasMore: state.hasMore,
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: RechargeOrderTile(item: state.items[index]),
                   );
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: RechargeOrderTile(item: state.items[index]),
-                );
-              },
+                },
+              ),
             ),
     );
   }

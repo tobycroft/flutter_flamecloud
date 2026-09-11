@@ -43,6 +43,9 @@ class RechargeOrderState {
   int get totalPages =>
       total <= 0 ? 1 : ((total + pageSize - 1) / pageSize).floor();
 
+  /// 是否还有更多数据（已加载条数 < 总条数）。
+  bool get hasMore => items.length < total;
+
   /// 复制出新状态。
   RechargeOrderState copyWith({
     List<RechargeOrderItem>? items,
@@ -89,8 +92,8 @@ class RechargeOrderController extends Notifier<RechargeOrderState> {
     await _fetch(page: 1);
   }
 
-  /// 重新拉取当前页。
-  Future<void> refresh() => _fetch(page: state.page);
+  /// 重新拉取第一页（下拉刷新/重试时重置列表）。
+  Future<void> refresh() => _fetch(page: 1);
 
   /// 按订单号搜索并回到第一页。
   Future<void> search(String keyword) async {
@@ -98,16 +101,16 @@ class RechargeOrderController extends Notifier<RechargeOrderState> {
     await _fetch(page: 1);
   }
 
-  /// 翻到指定页。
-  Future<void> goPage(int page) async {
-    if (page < 1 || page > state.totalPages) {
+  /// 上拉加载下一页（追加到已有列表），无更多或加载中时跳过。
+  Future<void> loadMore() async {
+    if (state.loading || !state.hasMore) {
       return;
     }
-    await _fetch(page: page);
+    await _fetch(page: state.page + 1, append: true);
   }
 
-  /// 拉取指定页订单。
-  Future<void> _fetch({required int page}) async {
+  /// 拉取指定页订单；[append] 为 true 时追加到已有列表（上拉加载）。
+  Future<void> _fetch({required int page, bool append = false}) async {
     state = state.copyWith(loading: true, page: page, clearError: true);
     try {
       final RechargeOrderResult result = await ref
@@ -122,7 +125,9 @@ class RechargeOrderController extends Notifier<RechargeOrderState> {
       }
       _loaded = true;
       state = state.copyWith(
-        items: result.items,
+        items: append
+            ? <RechargeOrderItem>[...state.items, ...result.items]
+            : result.items,
         total: result.total,
         loading: false,
       );
