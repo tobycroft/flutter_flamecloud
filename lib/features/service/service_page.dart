@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import '../../../core/theme/app_surfaces.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -17,6 +20,7 @@ class ServicePage extends StatelessWidget {
       icon: Icons.dns_outlined,
       name: '云服务器',
       description: 'ECS 实例的创建、续费与运维',
+      route: AppRoutes.ecsBuy,
     ),
     ServiceEntry(
       icon: Icons.hub_outlined,
@@ -61,6 +65,7 @@ class ServiceEntry {
     required this.icon,
     required this.name,
     required this.description,
+    this.route,
   });
 
   /// 图标。
@@ -71,6 +76,9 @@ class ServiceEntry {
 
   /// 描述。
   final String description;
+
+  /// 已接入页面时的跳转路由，为 null 则提示「正在搬迁中」。
+  final String? route;
 }
 
 class _ServiceTile extends StatelessWidget {
@@ -86,7 +94,13 @@ class _ServiceTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        onTap: () => _comingSoon(context, entry.name),
+        onTap: () {
+          if (entry.route != null) {
+            unawaited(Navigator.of(context).pushNamed(entry.route!));
+          } else {
+            _comingSoon(context, entry.name);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

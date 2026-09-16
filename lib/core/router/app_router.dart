@@ -4,6 +4,8 @@ import '../../features/ak/ak_log_page.dart';
 import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
+import '../../features/ecs/ecs_buy_page.dart';
+import '../../features/ecs/ecs_pay_page.dart';
 import '../../features/fund/fund_manage_page.dart';
 import '../../features/log/action_log_page.dart';
 import '../../features/news/news_detail_page.dart';
@@ -56,6 +58,12 @@ class AppRoutes {
 
   /// 新闻公告详情页，pathParameters 传入公告 id。
   static const String newsDetail = '/news/detail';
+
+  /// ECS 创建（购买）页。
+  static const String ecsBuy = '/ecs/buy';
+
+  /// ECS 订单支付页，arguments 传入订单 id。
+  static const String ecsPay = '/ecs/pay';
 }
 
 /// 命名路由表。
@@ -134,6 +142,18 @@ class AppRouter {
           settings: settings,
           builder: (_) => NewsDetailPage(
             id: settings.arguments is int ? settings.arguments as int : 0,
+          ),
+        );
+      case AppRoutes.ecsBuy:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const EcsBuyPage(),
+        );
+      case AppRoutes.ecsPay:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => EcsPayPage(
+            orderId: settings.arguments is int ? settings.arguments as int : 0,
           ),
         );
       default:

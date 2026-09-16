@@ -77,7 +77,7 @@ class ApiEndpoints {
   static const chat = _ChatEndpoints();
 
   /// 云服务器。
-  static const ecs = _EcsEndpoints();
+  static final ecs = _EcsEndpoints();
 
   /// 新闻公告（公开接口，无需登录）。
   static const news = _NewsEndpoints();
@@ -295,19 +295,16 @@ class _ChatEndpoints {
 
 /// 云服务器接口。
 class _EcsEndpoints {
-  const _EcsEndpoints();
+  _EcsEndpoints();
 
-  /// 下单配置（ECS 页面搬迁后启用）。
-  // ignore: unused_field
-  static const config = _EcsConfigEndpoints();
+  /// 下单配置。
+  final _EcsConfigEndpoints config = _EcsConfigEndpoints();
 
-  /// 实例（ECS 页面搬迁后启用）。
-  // ignore: unused_field
-  static const instance = _EcsInstanceEndpoints();
+  /// 实例。
+  final _EcsInstanceEndpoints instance = _EcsInstanceEndpoints();
 
-  /// 订单（ECS 页面搬迁后启用）。
-  // ignore: unused_field
-  static const order = _EcsOrderEndpoints();
+  /// 订单。
+  final _EcsOrderEndpoints order = _EcsOrderEndpoints();
 }
 
 /// 云服务器下单配置接口。
@@ -337,6 +334,12 @@ class _EcsConfigEndpoints {
 
   /// 专有网络。
   final String vpcs = '/v1/ecs/config/vpcs';
+
+  /// 购买周期与折扣配置。
+  final String periods = '/v1/ecs/config/periods';
+
+  /// 配置总价计算（地域/可用区/规格/带宽/数量/周期/数据盘/镜像）。
+  final String price = '/v1/ecs/config/price';
 }
 
 /// 云服务器实例接口。
