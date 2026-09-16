@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/widgets/infinite_scroll.dart';
 import '../balance_log_controller.dart';
 import 'balance_log_tile.dart';
@@ -93,7 +94,15 @@ class _BalanceLogTabState extends ConsumerState<BalanceLogTab> {
                   }
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: BalanceLogTile(item: state.items[index]),
+                    child: BalanceLogTile(
+                      item: state.items[index],
+                      onTap: () => unawaited(
+                        Navigator.of(context).pushNamed(
+                          AppRoutes.balanceLogDetail,
+                          arguments: state.items[index],
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),

@@ -7,106 +7,123 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/action_log.dart';
 
 /// 单条操作日志。
+///
+/// 点击可钻取 [ActionLogDetailPage] 查看完整字段（详情 / IP / 设备等）。
 class ActionLogTile extends StatelessWidget {
-  const ActionLogTile({super.key, required this.item, required this.types});
+  const ActionLogTile({
+    super.key,
+    required this.item,
+    required this.types,
+    this.onTap,
+  });
 
   final ActionLogItem item;
   final List<ActionLogType> types;
+
+  /// 点击钻取日志详情，为 null 时不响应。
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color typeColor = _typeColor(_typeCode(item.logTypeId));
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                ),
-                child: Text(
-                  _typeName(item.logTypeId),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: typeColor,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: typeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                  child: Text(
+                    _typeName(item.logTypeId),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: typeColor,
+                    ),
                   ),
                 ),
-              ),
-              if (item.deviceType != null && item.deviceType!.isNotEmpty)
-                ...<Widget>[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _deviceColor(item.deviceType!)
-                          .withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                    ),
-                    child: Text(
-                      item.deviceType!,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: _deviceColor(item.deviceType!),
+                if (item.deviceType != null && item.deviceType!.isNotEmpty)
+                  ...<Widget>[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _deviceColor(item.deviceType!)
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      ),
+                      child: Text(
+                        item.deviceType!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: _deviceColor(item.deviceType!),
+                        ),
                       ),
                     ),
+                  ],
+                const Spacer(),
+                Text(
+                  item.displayTime,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF9CA3AF),
                   ),
-                ],
-              const Spacer(),
-              Text(
-                item.displayTime,
-                style: TextStyle(
-                  fontSize: 12,
-                  color:
-                      isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
                 ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              item.action,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ],
             ),
-          ),
-          if (item.detail.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 6),
               child: Text(
-                item.detail,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.5,
-                  color:
-                      isDark ? const Color(0xFFCBD5E1) : const Color(0xFF374151),
-                ),
+                item.action,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
-          if (item.ip.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'IP ${item.ip}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color:
-                      isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
+            if (item.detail.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  item.detail,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: isDark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF374151),
+                  ),
                 ),
               ),
-            ),
-        ],
+            if (item.ip.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'IP ${item.ip}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

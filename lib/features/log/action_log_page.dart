@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/router/app_router.dart';
 import '../../core/widgets/infinite_scroll.dart';
+import '../../data/models/action_log.dart';
 
 import 'action_log_controller.dart';
+import 'action_log_detail_page.dart';
 import 'action_log_page/action_log_tile.dart';
 import 'action_log_page/error_view.dart';
 import 'action_log_page/type_filter_bar.dart';
@@ -98,13 +101,33 @@ class _ActionLogPageState extends ConsumerState<ActionLogPage> {
                 hasMore: state.hasMore,
               );
             }
+            final ActionLogItem item = state.items[index];
             return ActionLogTile(
-              item: state.items[index],
+              item: item,
               types: state.types,
+              onTap: () => unawaited(
+                Navigator.of(context).pushNamed(
+                  AppRoutes.actionLogDetail,
+                  arguments: ActionLogDetailArgs(
+                    item: item,
+                    typeName: _resolveTypeName(item, state.types),
+                  ),
+                ),
+              ),
             );
           },
         ),
       ),
     );
   }
+}
+
+/// 按日志类型 id 解析中文名；字典缺失时返回 null（详情页退化为「类型 {id}」）。
+String? _resolveTypeName(ActionLogItem item, List<ActionLogType> types) {
+  for (final ActionLogType type in types) {
+    if (type.id == item.logTypeId) {
+      return type.name;
+    }
+  }
+  return null;
 }

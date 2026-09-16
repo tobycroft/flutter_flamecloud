@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/infinite_scroll.dart';
 import '../../../data/models/access_key.dart';
@@ -54,6 +55,12 @@ class AkLogListView extends ConsumerWidget {
             return _AkLogTile(
               item: state.items[index],
               showAkId: state.akId == null,
+              onTap: () => unawaited(
+                Navigator.of(context).pushNamed(
+                  AppRoutes.akLogDetail,
+                  arguments: state.items[index],
+                ),
+              ),
             );
           },
         ),
@@ -93,8 +100,14 @@ class _ErrorView extends StatelessWidget {
 }
 
 /// 单条 AK 调用日志。
+///
+/// 点击可钻取 [AkLogDetailPage] 查看完整字段（AK ID / 详情 / IP / 时间）。
 class _AkLogTile extends StatelessWidget {
-  const _AkLogTile({required this.item, required this.showAkId});
+  const _AkLogTile({
+    required this.item,
+    required this.showAkId,
+    this.onTap,
+  });
 
   /// 日志数据。
   final AccessKeyLogItem item;
@@ -102,86 +115,93 @@ class _AkLogTile extends StatelessWidget {
   /// 全部日志视图下额外展示所属 AK id。
   final bool showAkId;
 
+  /// 点击钻取日志详情，为 null 时不响应。
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color actionColor = _actionColor(item.action);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: actionColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                ),
-                child: Text(
-                  item.action,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: actionColor,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: actionColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                  child: Text(
+                    item.action,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: actionColor,
+                    ),
                   ),
                 ),
-              ),
-              if (showAkId) ...<Widget>[
-                const SizedBox(width: 8),
+                if (showAkId) ...<Widget>[
+                  const SizedBox(width: 8),
+                  Text(
+                    'AK #${item.akId}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+                const Spacer(),
                 Text(
-                  'AK #${item.akId}',
+                  item.displayTime,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
                     color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF6B7280),
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF9CA3AF),
                   ),
                 ),
               ],
-              const Spacer(),
-              Text(
-                item.displayTime,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? const Color(0xFF64748B)
-                      : const Color(0xFF9CA3AF),
-                ),
-              ),
-            ],
-          ),
-          if (item.detail.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                item.detail,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.5,
-                  color: isDark
-                      ? const Color(0xFFCBD5E1)
-                      : const Color(0xFF374151),
-                ),
-              ),
             ),
-          if (item.ip.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'IP ${item.ip}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? const Color(0xFF64748B)
-                      : const Color(0xFF9CA3AF),
+            if (item.detail.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  item.detail,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: isDark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF374151),
+                  ),
                 ),
               ),
-            ),
-        ],
+            if (item.ip.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'IP ${item.ip}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

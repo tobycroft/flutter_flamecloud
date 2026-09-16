@@ -7,10 +7,15 @@ import '../../../data/models/recharge_order.dart';
 import '../fund_meta.dart';
 
 /// 单条充值订单卡片，对齐 Vue 端表格行展示的字段。
+///
+/// 点击可钻取 [RechargeOrderDetailPage] 查看完整订单信息。
 class RechargeOrderTile extends StatelessWidget {
-  const RechargeOrderTile({required this.item, super.key});
+  const RechargeOrderTile({required this.item, this.onTap, super.key});
 
   final RechargeOrderItem item;
+
+  /// 点击钻取订单详情，为 null 时不响应。
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,76 +27,84 @@ class RechargeOrderTile extends StatelessWidget {
         ? const Color(0xFF64748B)
         : const Color(0xFF9CA3AF);
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.surfaces.panel,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: context.surfaces.panel,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Expanded(
-                child: Text(
-                  item.orderNo,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                    color: orderNoColor,
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      item.orderNo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'monospace',
+                        color: orderNoColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _StatusBadge(
+                    text: FundMeta.orderStatusText(item.status),
+                    color: FundMeta.orderStatusColor(item.status),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    '¥${item.amountText}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.flame500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    item.displayTime,
+                    style: TextStyle(fontSize: 12, color: metaColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: <Widget>[
+                  _MetaTag(text: FundMeta.payMethodText(item.payMethod)),
+                  const SizedBox(width: 6),
+                  _MetaTag(text: item.type == 2 ? '线下充值' : '在线充值'),
+                  if (item.remitTimeText.isNotEmpty) ...<Widget>[
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: _MetaTag(text: '汇款 ${item.remitTimeText}'),
+                    ),
+                  ],
+                ],
+              ),
+              if (item.remark.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '备注：${item.remark}',
+                    style: TextStyle(fontSize: 12, color: metaColor),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              _StatusBadge(
-                text: FundMeta.orderStatusText(item.status),
-                color: FundMeta.orderStatusColor(item.status),
-              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                '¥${item.amountText}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.flame500,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                item.displayTime,
-                style: TextStyle(fontSize: 12, color: metaColor),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: <Widget>[
-              _MetaTag(text: FundMeta.payMethodText(item.payMethod)),
-              const SizedBox(width: 6),
-              _MetaTag(text: item.type == 2 ? '线下充值' : '在线充值'),
-              if (item.remitTimeText.isNotEmpty) ...<Widget>[
-                const SizedBox(width: 6),
-                Flexible(child: _MetaTag(text: '汇款 ${item.remitTimeText}')),
-              ],
-            ],
-          ),
-          if (item.remark.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                '备注：${item.remark}',
-                style: TextStyle(fontSize: 12, color: metaColor),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../data/models/access_key.dart';
+import '../../data/models/action_log.dart' hide ActionLogPage;
+import '../../data/models/balance_log.dart';
+import '../../data/models/recharge_order.dart';
+import '../../features/ak/ak_log_detail_page.dart';
 import '../../features/ak/ak_log_page.dart';
 import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
 import '../../features/ecs/ecs_buy_page.dart';
 import '../../features/ecs/ecs_pay_page.dart';
+import '../../features/fund/balance_log_detail_page.dart';
 import '../../features/fund/fund_manage_page.dart';
+import '../../features/fund/recharge_order_detail_page.dart';
+import '../../features/log/action_log_detail_page.dart';
 import '../../features/log/action_log_page.dart';
 import '../../features/news/news_detail_page.dart';
 import '../../features/news/news_list_page.dart';
@@ -64,6 +72,18 @@ class AppRoutes {
 
   /// ECS 订单支付页，arguments 传入订单 id。
   static const String ecsPay = '/ecs/pay';
+
+  /// 充值订单详情页，arguments 传入 [RechargeOrderItem]。
+  static const String rechargeOrderDetail = '/recharge/order/detail';
+
+  /// 余额流水详情页，arguments 传入 [BalanceLogItem]。
+  static const String balanceLogDetail = '/balance/log/detail';
+
+  /// 操作日志详情页，arguments 传入 [ActionLogDetailArgs]。
+  static const String actionLogDetail = '/action/log/detail';
+
+  /// AK 调用日志详情页，arguments 传入 [AccessKeyLogItem]。
+  static const String akLogDetail = '/ak/log/detail';
 }
 
 /// 命名路由表。
@@ -155,6 +175,78 @@ class AppRouter {
           builder: (_) => EcsPayPage(
             orderId: settings.arguments is int ? settings.arguments as int : 0,
           ),
+        );
+      case AppRoutes.rechargeOrderDetail:
+        final RechargeOrderItem rechargeItem =
+            settings.arguments is RechargeOrderItem
+                ? settings.arguments as RechargeOrderItem
+                : const RechargeOrderItem(
+                    id: 0,
+                    orderNo: '',
+                    amount: '0',
+                    payMethod: '',
+                    type: 1,
+                    status: 0,
+                    createdAt: '',
+                    remitTime: '',
+                    remark: '',
+                  );
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => RechargeOrderDetailPage(item: rechargeItem),
+        );
+      case AppRoutes.balanceLogDetail:
+        final BalanceLogItem balanceItem = settings.arguments is BalanceLogItem
+            ? settings.arguments as BalanceLogItem
+            : const BalanceLogItem(
+                id: 0,
+                type: 0,
+                orderNo: '',
+                amount: '0',
+                balanceAfter: '0',
+                description: '',
+                createdAt: '',
+              );
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => BalanceLogDetailPage(item: balanceItem),
+        );
+      case AppRoutes.actionLogDetail:
+        final dynamic actionArgs = settings.arguments;
+        final ActionLogItem actionItem =
+            actionArgs is ActionLogDetailArgs ? actionArgs.item : const ActionLogItem(
+                id: 0,
+                uid: 0,
+                logTypeId: 0,
+                action: '',
+                detail: '',
+                ip: '',
+                deviceType: null,
+                createdAt: '',
+              );
+        final String? actionTypeName =
+            actionArgs is ActionLogDetailArgs ? actionArgs.typeName : null;
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => ActionLogDetailPage(
+            item: actionItem,
+            typeName: actionTypeName,
+          ),
+        );
+      case AppRoutes.akLogDetail:
+        final AccessKeyLogItem akItem = settings.arguments is AccessKeyLogItem
+            ? settings.arguments as AccessKeyLogItem
+            : const AccessKeyLogItem(
+                id: 0,
+                akId: 0,
+                action: '',
+                detail: '',
+                ip: '',
+                createdAt: '',
+              );
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => AkLogDetailPage(item: akItem),
         );
       default:
         return null;
