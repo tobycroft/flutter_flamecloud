@@ -141,6 +141,21 @@ class _UserEndpoints {
 
   /// 充值订单详情。
   final String rechargeDetail = '/v1/user/recharge/detail';
+
+  /// 账单列表。
+  final String billList = '/v1/user/bill/list';
+
+  /// 账单详情。
+  final String billDetail = '/v1/user/bill/detail';
+
+  /// 生成账单（按实例出账）。
+  final String billGenerate = '/v1/user/bill/generate';
+
+  /// 账单可用账期。
+  final String billPeriods = '/v1/user/bill/periods';
+
+  /// 账单汇总（结算总额 / 账单条数）。
+  final String billSummary = '/v1/user/bill/summary';
 }
 
 /// 站内通知接口。

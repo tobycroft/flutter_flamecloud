@@ -64,4 +64,26 @@ class FundMeta {
 
   /// 是否为收入类流水（充值 / 退款 / 系统调整），用于金额正负号与配色。
   static bool balanceTypeIsIncome(int type) => type != 2;
+
+  /// 账单状态文案：0 未出账、1 已出账。
+  static String billStatusText(int status) => switch (status) {
+    0 => '未出账',
+    1 => '已出账',
+    _ => '未知',
+  };
+
+  /// 账单状态配色，对账 Vue 端 badge（灰/绿）。
+  static Color billStatusColor(int status) => switch (status) {
+    1 => const Color(0xFF16A34A),
+    _ => const Color(0xFF9CA3AF),
+  };
+
+  /// 账单计费模块文案：cpu/memory/disk/bandwidth。
+  static String billModuleText(String module) => switch (module) {
+    'cpu' => 'CPU 计算',
+    'memory' => '内存',
+    'disk' => '系统盘',
+    'bandwidth' => '带宽',
+    _ => module.isEmpty ? '未知模块' : module,
+  };
 }

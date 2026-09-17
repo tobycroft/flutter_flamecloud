@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'balance_summary_controller.dart';
 import 'fund_manage_page/balance_log_tab.dart';
+import 'fund_manage_page/bill_tab.dart';
 import 'fund_manage_page/fund_balance_card.dart';
 import 'fund_manage_page/recharge_order_tab.dart';
 import 'recharge_page.dart';
@@ -30,7 +31,7 @@ class _FundManagePageState extends ConsumerState<FundManagePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         unawaited(
@@ -70,12 +71,17 @@ class _FundManagePageState extends ConsumerState<FundManagePage>
             tabs: const <Widget>[
               Tab(text: '充值订单'),
               Tab(text: '余额流水'),
+              Tab(text: '账单'),
             ],
           ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: const <Widget>[RechargeOrderTab(), BalanceLogTab()],
+              children: const <Widget>[
+                RechargeOrderTab(),
+                BalanceLogTab(),
+                BillTab(),
+              ],
             ),
           ),
         ],

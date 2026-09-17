@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/access_key.dart';
 import '../../data/models/action_log.dart' hide ActionLogPage;
 import '../../data/models/balance_log.dart';
+import '../../data/models/bill.dart';
 import '../../data/models/ecs_instance.dart';
 import '../../data/models/recharge_order.dart';
 import '../../features/ak/ak_log_detail_page.dart';
@@ -15,6 +16,7 @@ import '../../features/ecs/ecs_instance_detail_page.dart';
 import '../../features/ecs/ecs_page.dart';
 import '../../features/ecs/ecs_pay_page.dart';
 import '../../features/fund/balance_log_detail_page.dart';
+import '../../features/fund/bill_detail_page.dart';
 import '../../features/fund/fund_manage_page.dart';
 import '../../features/fund/recharge_page.dart';
 import '../../features/fund/recharge_order_detail_page.dart';
@@ -95,6 +97,9 @@ class AppRoutes {
 
   /// 余额流水详情页，arguments 传入 [BalanceLogItem]。
   static const String balanceLogDetail = '/balance/log/detail';
+
+  /// 账单详情页，arguments 传入 [BillItem]。
+  static const String billDetail = '/bill/detail';
 
   /// 操作日志详情页，arguments 传入 [ActionLogDetailArgs]。
   static const String actionLogDetail = '/action/log/detail';
@@ -260,6 +265,32 @@ class AppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => BalanceLogDetailPage(item: balanceItem),
+        );
+      case AppRoutes.billDetail:
+        final BillItem billItem = settings.arguments is BillItem
+            ? settings.arguments as BillItem
+            : const BillItem(
+                id: 0,
+                billNo: '',
+                billingPeriod: '',
+                product: '',
+                instanceId: '',
+                instanceName: '',
+                moduleType: '',
+                payMethod: '',
+                totalPrice: '0',
+                discountAmount: '0',
+                settlementPrice: '0',
+                couponAmount: '0',
+                balancePay: '0',
+                status: 0,
+                startTime: '',
+                endTime: '',
+                chargeTime: '',
+              );
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => BillDetailPage(item: billItem),
         );
       case AppRoutes.actionLogDetail:
         final dynamic actionArgs = settings.arguments;
