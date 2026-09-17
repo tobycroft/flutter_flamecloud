@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/access_key.dart';
 import '../../data/models/action_log.dart' hide ActionLogPage;
 import '../../data/models/balance_log.dart';
+import '../../data/models/ecs_instance.dart';
 import '../../data/models/recharge_order.dart';
 import '../../features/ak/ak_log_detail_page.dart';
 import '../../features/ak/ak_log_page.dart';
@@ -10,6 +11,8 @@ import '../../features/ak/ak_manage_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/console/console_shell_page.dart';
 import '../../features/ecs/ecs_buy_page.dart';
+import '../../features/ecs/ecs_instance_detail_page.dart';
+import '../../features/ecs/ecs_page.dart';
 import '../../features/ecs/ecs_pay_page.dart';
 import '../../features/fund/balance_log_detail_page.dart';
 import '../../features/fund/fund_manage_page.dart';
@@ -72,6 +75,12 @@ class AppRoutes {
 
   /// ECS 订单支付页，arguments 传入订单 id。
   static const String ecsPay = '/ecs/pay';
+
+  /// ECS 控制台页（实例列表 / 安全组 / 快照）。
+  static const String ecs = '/ecs';
+
+  /// ECS 实例详情页，arguments 传入 [EcsInstance]。
+  static const String ecsDetail = '/ecs/detail';
 
   /// 充值订单详情页，arguments 传入 [RechargeOrderItem]。
   static const String rechargeOrderDetail = '/recharge/order/detail';
@@ -175,6 +184,26 @@ class AppRouter {
           builder: (_) => EcsPayPage(
             orderId: settings.arguments is int ? settings.arguments as int : 0,
           ),
+        );
+      case AppRoutes.ecs:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const EcsPage(),
+        );
+      case AppRoutes.ecsDetail:
+        final EcsInstance ecsItem = settings.arguments is EcsInstance
+            ? settings.arguments as EcsInstance
+            : const EcsInstance(
+              id: 0,
+              instanceId: '',
+              instanceName: '',
+              region: '',
+              status: 'stopped',
+              createdAt: '',
+            );
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => EcsInstanceDetailPage(item: ecsItem),
         );
       case AppRoutes.rechargeOrderDetail:
         final RechargeOrderItem rechargeItem =

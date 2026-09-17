@@ -20,7 +20,7 @@ class ServicePage extends StatelessWidget {
       icon: Icons.dns_outlined,
       name: '云服务器',
       description: 'ECS 实例的创建、续费与运维',
-      route: AppRoutes.ecsBuy,
+      route: AppRoutes.ecs,
     ),
     ServiceEntry(
       icon: Icons.hub_outlined,

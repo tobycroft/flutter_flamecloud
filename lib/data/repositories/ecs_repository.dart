@@ -9,6 +9,7 @@ import '../../core/net/dio_client.dart';
 import '../../core/net/http_providers.dart';
 import '../../core/utils/json_value.dart';
 import '../models/ecs.dart';
+import '../models/ecs_instance.dart';
 
 /// 云服务器接口仓库。
 ///
@@ -80,7 +81,7 @@ class EcsRepository {
       final Response<dynamic> response =
           await _dio.get<dynamic>(ApiEndpoints.ecs.config.specs, queryParameters: <String, Object?>{
         'region_id': regionId,
-        if (zoneId != null) 'zone_id': zoneId,
+        'zone_id': zoneId?,
       });
       return _parseList(response, EcsSpec.fromMap);
     } on DioException catch (error) {
@@ -166,6 +167,19 @@ class EcsRepository {
         throw const ApiException(0, '支付失败');
       }
       return EcsPayResult.fromMap(data);
+    } on DioException catch (error) {
+      throw error.toAppException();
+    }
+  }
+
+  /// 拉取当前用户的 ECS 实例列表，对应 `GET /v1/ecs/instance/list`。
+  ///
+  /// 后端按 uid 返回该用户全部实例（无分页），由上层做搜索/地域筛选。
+  Future<List<EcsInstance>> fetchInstances() async {
+    try {
+      final Response<dynamic> response =
+          await _dio.get<dynamic>(ApiEndpoints.ecs.instance.list);
+      return _parseList(response, EcsInstance.fromMap);
     } on DioException catch (error) {
       throw error.toAppException();
     }
