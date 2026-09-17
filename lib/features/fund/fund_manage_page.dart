@@ -7,6 +7,7 @@ import 'balance_summary_controller.dart';
 import 'fund_manage_page/balance_log_tab.dart';
 import 'fund_manage_page/fund_balance_card.dart';
 import 'fund_manage_page/recharge_order_tab.dart';
+import 'recharge_page.dart';
 
 /// 资金管理页。
 ///
@@ -50,7 +51,10 @@ class _FundManagePageState extends ConsumerState<FundManagePage>
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('资金管理')),
+      appBar: AppBar(
+        title: const Text('资金管理'),
+        actions: const <Widget>[RechargeEntryButton()],
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

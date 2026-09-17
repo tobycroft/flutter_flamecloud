@@ -16,7 +16,9 @@ import '../../features/ecs/ecs_page.dart';
 import '../../features/ecs/ecs_pay_page.dart';
 import '../../features/fund/balance_log_detail_page.dart';
 import '../../features/fund/fund_manage_page.dart';
+import '../../features/fund/recharge_page.dart';
 import '../../features/fund/recharge_order_detail_page.dart';
+import '../../features/fund/recharge_web_pay_page.dart';
 import '../../features/log/action_log_detail_page.dart';
 import '../../features/log/action_log_page.dart';
 import '../../features/news/news_detail_page.dart';
@@ -51,6 +53,12 @@ class AppRoutes {
 
   /// 资金管理页（余额概览 + 充值订单 + 余额流水）。
   static const String fundManage = '/fund/manage';
+
+  /// 充值页（在线/线下两个 Tab）。
+  static const String recharge = '/recharge';
+
+  /// 支付宝支付页，arguments 传入 pay_url 字符串。
+  static const String rechargeWebPay = '/recharge/webpay';
 
   /// 主题模式设置页。
   static const String themeMode = '/theme';
@@ -138,6 +146,19 @@ class AppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const FundManagePage(),
+        );
+      case AppRoutes.recharge:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const RechargePage(),
+        );
+      case AppRoutes.rechargeWebPay:
+        final String payUrl = settings.arguments is String
+            ? settings.arguments as String
+            : '';
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => RechargeWebPayPage(payUrl: payUrl),
         );
       case AppRoutes.themeMode:
         return MaterialPageRoute<void>(

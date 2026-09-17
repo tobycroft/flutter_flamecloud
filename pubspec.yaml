@@ -41,6 +41,8 @@ dependencies:
   url_launcher: ^6.3.2
   image_picker: ^1.1.2
   flutter_html: ^3.0.0
+  # 支付宝手机网站支付：后端返回 pay_url，App 内用 WebView 加载网关页面完成支付。
+  webview_flutter: ^4.4.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
