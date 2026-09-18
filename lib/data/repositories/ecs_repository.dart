@@ -81,7 +81,7 @@ class EcsRepository {
       final Response<dynamic> response =
           await _dio.get<dynamic>(ApiEndpoints.ecs.config.specs, queryParameters: <String, Object?>{
         'region_id': regionId,
-        ?'zone_id': zoneId,
+        if (zoneId != null) 'zone_id': zoneId,
       });
       return _parseList(response, EcsSpec.fromMap);
     } on DioException catch (error) {
