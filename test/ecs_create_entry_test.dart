@@ -82,11 +82,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 入口存在：工具栏「创建实例」按钮。
-    expect(find.text('创建实例'), findsOneWidget);
+    // 入口存在：工具栏「创建实例」按钮 + 悬浮创建按钮（FAB）。
+    expect(find.text('创建实例'), findsWidgets);
 
     // 点击后进入「创建ECS」页（购买表单 + 确认订单按钮）。
-    await tester.tap(find.text('创建实例'));
+    await tester.tap(find.text('创建实例').first);
     await tester.pumpAndSettle();
 
     expect(find.text('创建ECS'), findsOneWidget);

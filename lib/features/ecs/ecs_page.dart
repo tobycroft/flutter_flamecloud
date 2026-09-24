@@ -31,24 +31,45 @@ class EcsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('云服务器 ECS'),
-          bottom: const TabBar(
-            tabs: <Widget>[
-              Tab(text: '实例列表'),
-              Tab(text: '安全组'),
-              Tab(text: '快照管理'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: <Widget>[
-            EcsInstanceListTab(),
-            EcsSecurityGroupPanel(),
-            EcsSnapshotPanel(),
-          ],
-        ),
+      child: Builder(
+        builder: (BuildContext context) {
+          final TabController tab = DefaultTabController.of(context);
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('云服务器 ECS'),
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: '实例列表'),
+                  Tab(text: '安全组'),
+                  Tab(text: '快照管理'),
+                ],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                EcsInstanceListTab(),
+                EcsSecurityGroupPanel(),
+                EcsSnapshotPanel(),
+              ],
+            ),
+            // 仅「实例列表」Tab 显示悬浮创建按钮，保证新建入口最显眼、不会漏看。
+            floatingActionButton: AnimatedBuilder(
+              animation: tab,
+              builder: (BuildContext _, _) => tab.index == 0
+                  ? FloatingActionButton.extended(
+                      heroTag: 'ecs-create-fab',
+                      onPressed: () => unawaited(
+                        Navigator.of(context).pushNamed(AppRoutes.ecsBuy),
+                      ),
+                      icon: const Icon(Icons.add),
+                      label: const Text('创建实例'),
+                      backgroundColor: AppColors.flame500,
+                      foregroundColor: Colors.white,
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          );
+        },
       ),
     );
   }
