@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  APP 内自更新：登记 APK 下载目录，供 FileProvider 生成 content:// URI。
+
+  目录需与 Dart 侧 ApkDownloader.subDirectory 保持一致（update）：
+  - external-files-path：getExternalFilesDir(null)/update（Android 主用目录）
+  - cache-path：getCacheDir()/update（外部存储不可用时的兜底目录）
+-->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-files-path name="update_apk" path="update/"/>
+    <cache-path name="update_apk_cache" path="update/"/>
+</paths>

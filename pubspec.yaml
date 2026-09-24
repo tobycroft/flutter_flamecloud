@@ -39,6 +39,8 @@ dependencies:
   shared_preferences: ^2.5.5
   package_info_plus: ^10.2.1
   url_launcher: ^6.3.2
+  # APP 内自更新：下载 APK 到应用私有目录，供原生侧拉起系统安装器
+  path_provider: ^2.1.4
   image_picker: ^1.1.2
   flutter_html: ^3.0.0
   # 支付宝手机网站支付：后端返回 pay_url，App 内用 WebView 加载网关页面完成支付。

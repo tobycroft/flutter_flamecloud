@@ -38,6 +38,11 @@ android {
     }
 }
 
+dependencies {
+    // APP 内自更新：Android 7+ 需经 FileProvider 把 APK 授权给系统安装器
+    implementation("androidx.core:core-ktx:1.13.1")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
