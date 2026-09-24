@@ -128,17 +128,15 @@ class _EcsInstanceListTabState extends ConsumerState<EcsInstanceListTab> {
                       style: TextStyle(fontSize: 12, color: secondary),
                     ),
                   ),
-                  OutlinedButton.icon(
+                  FilledButton.icon(
                     onPressed: () => unawaited(
                       Navigator.of(context).pushNamed(AppRoutes.ecsBuy),
                     ),
                     icon: const Icon(Icons.add, size: 16),
                     label: const Text('创建实例'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.flame500,
-                      side: BorderSide(
-                        color: AppColors.flame500.withValues(alpha: 0.4),
-                      ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.flame500,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -207,18 +205,37 @@ class _EcsInstanceListTabState extends ConsumerState<EcsInstanceListTab> {
 
     final List<EcsInstance> list = state.filtered;
     if (list.isEmpty) {
-      final String hint = state.searchQuery.trim().isNotEmpty ||
-              state.selectedRegion != null
-          ? '没有匹配的实例'
-          : '暂无实例，点击「创建实例」新建一台';
+      final bool isFiltered =
+          state.searchQuery.trim().isNotEmpty ||
+          state.selectedRegion != null;
+      final String hint = isFiltered ? '没有匹配的实例' : '暂无实例，点击下方按钮新建一台';
       return ListView(
         children: <Widget>[
           SizedBox(
-            height: 200,
+            height: 240,
             child: Center(
-              child: Text(
-                hint,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    hint,
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                  ),
+                  if (!isFiltered) ...<Widget>[
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => unawaited(
+                        Navigator.of(context).pushNamed(AppRoutes.ecsBuy),
+                      ),
+                      icon: const Icon(Icons.add_circle_outline, size: 18),
+                      label: const Text('创建实例'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.flame500,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),

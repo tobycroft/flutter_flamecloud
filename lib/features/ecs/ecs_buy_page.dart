@@ -553,14 +553,19 @@ class _NetworkConfig extends ConsumerWidget {
         ),
         _FieldRow(
           label: '',
-          child: SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              '免费赠送公网 (${state.line}) IP 1 个',
-              style: const TextStyle(fontSize: 14),
+          // SwitchListTile 背景画在最近的 Material 上，需自持一层 Material，
+          // 否则外层带背景色的容器会遮挡水波纹（测试断言也会报错）。
+          child: Material(
+            type: MaterialType.transparency,
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                '免费赠送公网 (${state.line}) IP 1 个',
+                style: const TextStyle(fontSize: 14),
+              ),
+              value: state.hasPublicIp,
+              onChanged: controller.setHasPublicIp,
             ),
-            value: state.hasPublicIp,
-            onChanged: controller.setHasPublicIp,
           ),
         ),
       ],
