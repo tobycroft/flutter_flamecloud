@@ -292,8 +292,13 @@ class EcsBuyController extends Notifier<EcsBuyState> {
   }
 
   /// 进入页面时加载地域与周期配置。
+  ///
+  /// 通过 [force] 强制触发「地域 -> 可用区 -> 规格」的完整级联，
+  /// 绕过 [selectRegion]/[selectZone] 的早退守卫。这样即使上一次进入时
+  /// 加载被部分打断或失败（非 autoDispose 的 provider 会保留旧状态），
+  /// 再次进入仍能自动重新拉取规格，避免「规格不自动加载、需手动切换」的问题。
   Future<void> init() async {
-    await Future.wait(<Future<void>>[_loadRegions(), _loadPeriods()]);
+    await Future.wait(<Future<void>>[_loadRegions(force: true), _loadPeriods()]);
   }
 
   /// 当前操作系统对应的版本选项。
@@ -302,7 +307,7 @@ class EcsBuyController extends Notifier<EcsBuyState> {
   /// 是否还能继续添加数据盘。
   bool get canAddDataDisk => state.dataDisks.length < 5;
 
-  Future<void> _loadRegions() async {
+  Future<void> _loadRegions({bool force = false}) async {
     state = state.copyWith(configLoading: true, clearError: true);
     try {
       final List<EcsRegion> regions = await _repo.fetchRegions();
@@ -312,7 +317,7 @@ class EcsBuyController extends Notifier<EcsBuyState> {
       state = state.copyWith(regions: regions);
       final int? firstId = regions.isEmpty ? null : regions.first.id;
       if (firstId != null) {
-        await selectRegion(firstId);
+        await selectRegion(firstId, force: force);
       } else {
         state = state.copyWith(configLoading: false);
       }
@@ -352,8 +357,9 @@ class EcsBuyController extends Notifier<EcsBuyState> {
     }
   }
 
-  Future<void> selectRegion(int id) async {
-    if (state.selectedRegionId == id && state.zones.isNotEmpty) {
+  Future<void> selectRegion(int id, {bool force = false}) async {
+    // 手动切换相同地域且可用区已加载时跳过重复请求；[force] 用于进入页面时的强制级联。
+    if (!force && state.selectedRegionId == id && state.zones.isNotEmpty) {
       return;
     }
     state = state.copyWith(
@@ -370,8 +376,10 @@ class EcsBuyController extends Notifier<EcsBuyState> {
   }
 
   /// 切换可用区后重新加载该可用区下的规格并询价。
-  Future<void> selectZone(int id) async {
-    if (state.selectedZoneId == id && state.specs.isNotEmpty) {
+  ///
+  /// [force] 用于进入页面时的强制级联，绕过「相同可用区且规格已加载」的早退守卫。
+  Future<void> selectZone(int id, {bool force = false}) async {
+    if (!force && state.selectedZoneId == id && state.specs.isNotEmpty) {
       return;
     }
     state = state.copyWith(
